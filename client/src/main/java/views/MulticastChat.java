@@ -1,14 +1,12 @@
 package views;
 
 import utils.AppColors;
-import utils.FontAwesomeIcons;
 
 public class MulticastChat extends javax.swing.JFrame {
   private static MulticastChat instance;
   private MulticastChat() {
     initComponents();
     setLocationRelativeTo(null);
-    setIconUser();
   }
   
   public static MulticastChat getInstance() {
@@ -18,11 +16,6 @@ public class MulticastChat extends javax.swing.JFrame {
     
     return instance;
   }
-  
-  private void setIconUser() {
-    this.labelUserIcon.setIcon(FontAwesomeIcons.userIcon(40));
-  }
- 
 
   /**
    * This method is called from within the constructor to initialize the form.
@@ -43,9 +36,9 @@ public class MulticastChat extends javax.swing.JFrame {
     BtnGroup = new javax.swing.JButton();
     BtnGroup1 = new javax.swing.JButton();
     BtnGroup2 = new javax.swing.JButton();
-    panelUserInfo = new javax.swing.JPanel();
-    labelUserIcon = new javax.swing.JLabel();
-    labelUsername = new javax.swing.JLabel();
+    userInfoComponent1 = new components.UserInfoComponent();
+    ContainerMessage = new javax.swing.JPanel();
+    textFieldMessage = new javax.swing.JTextField();
 
     setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -65,7 +58,7 @@ public class MulticastChat extends javax.swing.JFrame {
     LabelGroups.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
     LabelGroups.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
     LabelGroups.setText("Grupos");
-    PanelLateral.add(LabelGroups, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 70, 60, -1));
+    PanelLateral.add(LabelGroups, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 60, 60, -1));
 
     LabelUsers.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
     LabelUsers.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -101,24 +94,30 @@ public class MulticastChat extends javax.swing.JFrame {
     scrollGroups.setViewportView(panelGroups);
 
     PanelLateral.add(scrollGroups, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 90, 200, 250));
-
-    panelUserInfo.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-    panelUserInfo.add(labelUserIcon, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 60, 40));
-
-    labelUsername.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-    labelUsername.setForeground(new java.awt.Color(102, 102, 255));
-    labelUsername.setText("Username");
-    panelUserInfo.add(labelUsername, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 20, -1, -1));
-
-    PanelLateral.add(panelUserInfo, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 640, 200, 60));
+    PanelLateral.add(userInfoComponent1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 600, 200, -1));
 
     PanelChat.add(PanelLateral, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 200, 700));
+
+    ContainerMessage.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+    textFieldMessage.setBackground(new java.awt.Color(60, 63, 65));
+    textFieldMessage.setFont(new java.awt.Font("Lucida Sans", 0, 18)); // NOI18N
+    textFieldMessage.setText("Enviar mensaje");
+    textFieldMessage.setBorder(null);
+    textFieldMessage.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        textFieldMessageActionPerformed(evt);
+      }
+    });
+    ContainerMessage.add(textFieldMessage, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 10, 630, 40));
+
+    PanelChat.add(ContainerMessage, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 630, 770, 60));
 
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
     getContentPane().setLayout(layout);
     layout.setHorizontalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addComponent(PanelChat, javax.swing.GroupLayout.DEFAULT_SIZE, 1000, Short.MAX_VALUE)
+      .addComponent(PanelChat, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
     );
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -139,6 +138,10 @@ public class MulticastChat extends javax.swing.JFrame {
   private void BtnGroup2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnGroup2ActionPerformed
     // TODO add your handling code here:
   }//GEN-LAST:event_BtnGroup2ActionPerformed
+
+  private void textFieldMessageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textFieldMessageActionPerformed
+    // TODO add your handling code here:
+  }//GEN-LAST:event_textFieldMessageActionPerformed
 
   /**
    * @param args the command line arguments
@@ -179,15 +182,15 @@ public class MulticastChat extends javax.swing.JFrame {
   private javax.swing.JButton BtnGroup;
   private javax.swing.JButton BtnGroup1;
   private javax.swing.JButton BtnGroup2;
+  private javax.swing.JPanel ContainerMessage;
   private javax.swing.JLabel LabelDashboard;
   private javax.swing.JLabel LabelGroups;
   private javax.swing.JLabel LabelUsers;
   private javax.swing.JPanel PanelChat;
   private javax.swing.JPanel PanelLateral;
-  private javax.swing.JLabel labelUserIcon;
-  private javax.swing.JLabel labelUsername;
   private javax.swing.JPanel panelGroups;
-  private javax.swing.JPanel panelUserInfo;
   private javax.swing.JScrollPane scrollGroups;
+  private javax.swing.JTextField textFieldMessage;
+  private components.UserInfoComponent userInfoComponent1;
   // End of variables declaration//GEN-END:variables
 }

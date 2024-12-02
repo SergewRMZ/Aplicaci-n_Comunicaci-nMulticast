@@ -13,7 +13,6 @@ public class App {
     SwingUtilities.invokeLater(() -> {
       try {
         UIManager.setLookAndFeel(new FlatDarkLaf());
-        UIManager.put("Button.arc", 100);
         UIManager.put("Panel.arc", 100);
         Login main = Login.getInstanceLogin();
         SwingUtilities.updateComponentTreeUI(main);
