@@ -6,11 +6,10 @@ import java.util.List;
 import repository.rooms.ChatRoomRepository;
 
 public class GetChatRoomsCommand implements Command {
-  JsonObject response, data;
+  JsonObject response;
   private ChatRoomRepository chatRoomRepository;
 
   public GetChatRoomsCommand(JsonObject data, ChatRoomRepository chatRoomRepository) {
-    this.data = data;
     this.chatRoomRepository = chatRoomRepository;
     this.response = new JsonObject();
   }

@@ -1,7 +1,26 @@
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLightLaf;
+import java.util.Scanner;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import views.Login;
+
 
 public class App {
+  public Scanner input = new Scanner(System.in);
+  
   public static void main(String[] args) {
-    Client client = Client.getInstanceClient();
-    client.getChatRooms();
+    SwingUtilities.invokeLater(() -> {
+      try {
+        UIManager.setLookAndFeel(new FlatDarkLaf());
+        UIManager.put("Button.arc", 100);
+        UIManager.put("Panel.arc", 100);
+        Login main = Login.getInstanceLogin();
+        SwingUtilities.updateComponentTreeUI(main);
+        main.setVisible(true);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    });
   }
 }

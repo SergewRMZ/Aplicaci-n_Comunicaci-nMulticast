@@ -1,6 +1,7 @@
 config\DatabaseConfig.class
 presentation\comands\GetChatRoomsCommand.class
 repository\users\SqliteUserRepository.class
+presentation\comands\JoinChatRoomCommand.class
 repository\users\UserRepository.class
 ServerReloader$1.class
 presentation\comands\CommandInvoker.class
@@ -12,6 +13,7 @@ presentation\comands\Command.class
 presentation\comands\CreateChatRoomCommand.class
 presentation\Server.class
 domain\dto\UserDto.class
+presentation\comands\LoginUserCommand.class
 repository\rooms\ChatRoomRepository.class
 presentation\comands\CommandFactory.class
 domain\dto\ChatRoomDto.class

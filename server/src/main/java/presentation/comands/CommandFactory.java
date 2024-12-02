@@ -11,12 +11,14 @@ public class CommandFactory {
   private static final UserRepository userRepository = new SqliteUserRepository();
   private static final ChatRoomRepository chatRoomRepository = new SqliteChatRoomRepository();
   
-  private static Command command;
   public static JsonObject createCommand(String action, JsonObject data) {
+    Command command;
     switch (action) {
       case "register" -> command = new RegisterUserCommand(data, userRepository);
+      case "login" -> command = new LoginUserCommand(data, userRepository);
       case "createRoom" -> command = new CreateChatRoomCommand(data, chatRoomRepository);
       case "getRooms" -> command = new GetChatRoomsCommand(data, chatRoomRepository);
+      case "joinRoom" -> command = new JoinChatRoomCommand(data, chatRoomRepository);
       default -> throw new AssertionError();
     }
     
