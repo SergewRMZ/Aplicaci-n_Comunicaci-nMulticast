@@ -19,6 +19,7 @@ public class CommandFactory {
       case "createRoom" -> command = new CreateChatRoomCommand(data, chatRoomRepository);
       case "getRooms" -> command = new GetChatRoomsCommand(data, chatRoomRepository);
       case "joinRoom" -> command = new JoinChatRoomCommand(data, chatRoomRepository);
+      case "getUserGroups" -> command = new GetUserChatRoomsCommand(data, chatRoomRepository);
       default -> throw new AssertionError();
     }
     

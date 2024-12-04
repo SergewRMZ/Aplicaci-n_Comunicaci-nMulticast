@@ -17,4 +17,5 @@ presentation\comands\LoginUserCommand.class
 repository\rooms\ChatRoomRepository.class
 presentation\comands\CommandFactory.class
 domain\dto\ChatRoomDto.class
+presentation\comands\GetUserChatRoomsCommand.class
 repository\rooms\SqliteChatRoomRepository.class

@@ -20,7 +20,9 @@ public class SqliteChatRoomRepository implements ChatRoomRepository {
   
   private final String ADD_USER_TO_GROUP = "INSERT INTO group_members(group_id, user_id) VALUES(?, ?)";
   private final String GET_GROUP_ID_BY_NAME = "SELECT id FROM groups WHERE group_name = ?";
-  private final String VERIFY_USER_EXISTS_GROUP = "SELECT COUNT(*) group_members(group_id, user_id) VALUES(?, ?)";
+  private final String VERIFY_USER_EXISTS_GROUP = "SELECT COUNT(*) FROM group_members WHERE group_id = ? AND user_id = ?";
+  
+  private final String GET_USER_GROUPS = "SELECT g.group_name, g.multicast_address, g.port FROM groups g JOIN group_members gm ON g.id = gm.group_id WHERE gm.user_id = ?";
   
   /**
    * Verificar si una dirección multicast ya está asignada
@@ -95,7 +97,7 @@ public class SqliteChatRoomRepository implements ChatRoomRepository {
   }
 
   /**
-   * Obtener todos los grupos de chat
+   * Obtener todos los grupos de chat, para listarlos en el lado del frontend.
    * @return 
    */
   @Override
@@ -193,5 +195,33 @@ public class SqliteChatRoomRepository implements ChatRoomRepository {
           e.printStackTrace();
           return -1;
       }
+  }
+  
+  /**
+   * Función para traer los grupos o chat a los que pertenece un usuario.
+   * @param userId: Id del usuario.
+   * @return groups? groups : null
+   */
+  @Override
+  public synchronized List<ChatRoomDto> getUserGroups(int userId) {
+    List<ChatRoomDto> userGroups = new ArrayList<>();
+    try (Connection conn = DatabaseConfig.getConnection()) {
+      PreparedStatement stmt = conn.prepareStatement(GET_USER_GROUPS);
+      stmt.setInt(1, userId);
+      ResultSet rs = stmt.executeQuery();
+      
+      while (rs.next()) {
+        String groupName = rs.getString("group_name");
+        String multicastAddress = rs.getString("multicast_address");
+        int port = rs.getInt("port");
+        
+        ChatRoomDto chatRoomDto = new ChatRoomDto(groupName, multicastAddress, port);
+        userGroups.add(chatRoomDto);
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    
+    return userGroups;
   }
 }

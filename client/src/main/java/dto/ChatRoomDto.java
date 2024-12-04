@@ -1,4 +1,4 @@
-package domain.dto;
+package dto;
 public class ChatRoomDto {
   private String roomName;
   private String address;
