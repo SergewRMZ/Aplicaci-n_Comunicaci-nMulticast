@@ -1,6 +1,8 @@
+components\EmojiComponent.class
 views\Login$2.class
 App.class
 components\PlaceholderPasswordField$1.class
+Test.class
 Client\Client.class
 views\MulticastChat$3.class
 views\Register$1.class
@@ -10,11 +12,12 @@ views\Login.class
 views\Register$3.class
 utils\ImageLoader.class
 views\Register.class
-views\MulticastChat$4.class
+dto\ChatRoomDto.class
 views\Register$2.class
 components\PlaceholderPasswordField.class
 views\MulticastChat$2.class
 components\UserInfoComponent.class
+Test2.class
 views\Register$5.class
 components\PlaceholderTextField.class
 utils\AppColors.class
@@ -27,4 +30,3 @@ views\Login$4.class
 views\MulticastChat.class
 views\Login$1.class
 components\PlaceholderTextField$1.class
-views\MulticastChat$5.class

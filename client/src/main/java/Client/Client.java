@@ -3,14 +3,18 @@ package Client;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import dto.ChatRoomDto;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import threads.MulticastListener;
 
 public class Client {
+  // Información sobre la conexión al servidor.
   private static Client instance;
   private Gson gson;
   private int port = 8000;
@@ -18,11 +22,17 @@ public class Client {
   private MulticastSocket socketClient;
   private InetAddress serverAddress;
   
+  // Datos del Usuario
   private String username;
   private String idUser;
   
+  // ALBERCA DE HILOS
   private ExecutorService threadPool;
   private static final int MAX_CHATROOMS = 4;
+  
+  // Información sobre el grupo
+  private ChatRoomDto chatRoom;
+  
   private Client() {
     try {
       socketClient = new MulticastSocket();
@@ -39,8 +49,11 @@ public class Client {
     if(instance == null) {
       instance = new Client();
     }
-    
     return instance;
+  }
+  
+  public String getUsername() {
+    return this.username;
   }
   
   public String registerUser(String username, String password) {
@@ -56,6 +69,7 @@ public class Client {
       sendRequest(data);
       String response = getServerResponse();
       JsonObject jsonResponse = JsonParser.parseString(response).getAsJsonObject();
+      
       if (jsonResponse.has("status") && jsonResponse.get("status").getAsString().equals("success")) {
         String message = jsonResponse.get("message").getAsString();
         return message;
@@ -105,6 +119,20 @@ public class Client {
     return null;
   } // LoginUser
   
+  public void sendMessage(String message) {
+    try {
+      JsonObject jsonMessage = new JsonObject();
+      jsonMessage.addProperty("action", "message");
+      jsonMessage.addProperty("user", this.username);
+      jsonMessage.addProperty("message", message);
+      byte[] data = jsonMessage.toString().getBytes();
+      DatagramPacket packet = new DatagramPacket(data, data.length, InetAddress.getByName(chatRoom.getAddress()), chatRoom.getPort());
+      socketClient.send(packet);
+      System.out.println("Mensaje enviado");
+    } catch (Exception e) {
+    }
+  }
+  
   public void getChatRooms() {
     try {
       JsonObject request = new JsonObject();
@@ -113,6 +141,34 @@ public class Client {
       String response = getServerResponse();
       JsonObject jsonResponse = gson.fromJson(response, JsonObject.class);
       System.out.println(jsonResponse);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+  
+  public void getUserGroup () {
+    try {
+      JsonObject request = new JsonObject();
+      request.addProperty("action", "getUserGroups");
+      request.addProperty("idUser", idUser);
+      sendRequest(request);
+      String response = getServerResponse();
+      JsonObject jsonResponse = gson.fromJson(response, JsonObject.class);
+      System.out.println(jsonResponse);
+      if (jsonResponse.has("status")) {
+        String status = jsonResponse.get("status").getAsString();
+        if (status.equals("success")) {
+          JsonObject groupJson = jsonResponse.getAsJsonObject("group");
+          this.chatRoom = gson.fromJson(groupJson, ChatRoomDto.class);
+          
+          // Inicio de hilo para escuchar en el grupo
+          this.threadPool.submit(new MulticastListener(chatRoom.getAddress(), chatRoom.getPort()));
+        }
+        
+        else if(status.equals("not_found")) {
+          System.out.println("No te has unido al grupo");
+        }
+      }
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -154,15 +210,9 @@ public class Client {
           }
         } 
       }
-      System.out.println(response);
     } catch (Exception e) {
     }
   }
-  
-  public void sendMessage(String message) {
-    
-  }
-
   
   /**
    * Método para enviar una solicitud al servidor.

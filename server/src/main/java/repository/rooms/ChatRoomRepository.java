@@ -11,5 +11,6 @@ public interface ChatRoomRepository {
   List<String> getChatRooms();
   String getChatRoomAddress(String groupName);
   int getGroupIdByName(String roomName);
+  List<ChatRoomDto> getUserGroups(int userId);
 }
 

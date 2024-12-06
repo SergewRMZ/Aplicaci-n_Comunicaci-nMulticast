@@ -3,7 +3,7 @@ package utils;
 import java.awt.Color;
 
 public class AppColors {
-  public static final Color PRIMARY_COLOR = new Color(0x1E42B6);
+  public static final Color PRIMARY_COLOR = new Color(0xb72b2a);
   public static final Color SECONDARY_COLOR = new Color(0x2E448B);
   public static final Color GRAY_COLOR = new Color(0x252525);
   public static final Color BLACK_COLOR = new Color(0x000000);

@@ -1,4 +1,5 @@
 package views;
+import components.ImageLabel;
 import Client.Client;
 import components.PlaceholderPasswordField;
 import components.PlaceholderTextField;
@@ -10,11 +11,11 @@ import javax.swing.SwingConstants;
 import utils.AppColors;
 public class Login extends javax.swing.JFrame {
   private static Login instance;
+  private final String PATH_IMG_LABEL = "/IconUser.png";
   
   private Login() {
     initComponents();
     setLocationRelativeTo(null);
-    setIconUser();
     setMouseListenerForLink();
   }
   
@@ -26,14 +27,9 @@ public class Login extends javax.swing.JFrame {
     return instance;
   }
   
-  private void setIconUser () {
-    this.IconLabelUser.setIcon(FontAwesomeIcons.userIcon(100));
-    this.IconLabelUser.setHorizontalAlignment(SwingConstants.CENTER);
-    this.IconLabelUser.setVerticalAlignment(SwingConstants.CENTER);
-  }
   
   private void setMouseListenerForLink() {
-    LinkRegister.setForeground(AppColors.WHITE_COLOR);
+    LinkRegister.setForeground(AppColors.GRAY_COLOR);
     LinkRegister.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
     LinkRegister.addMouseListener(new MouseAdapter() {
       @Override
@@ -43,7 +39,7 @@ public class Login extends javax.swing.JFrame {
 
       @Override
       public void mouseExited(MouseEvent e) {
-        LinkRegister.setForeground(AppColors.WHITE_COLOR); 
+        LinkRegister.setForeground(AppColors.GRAY_COLOR); 
       }
 
       @Override
@@ -55,79 +51,105 @@ public class Login extends javax.swing.JFrame {
   }
   
   @SuppressWarnings("unchecked")
-  // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-  private void initComponents() {
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
 
-    IconLabelUser = new javax.swing.JLabel();
-    LoginLabel = new javax.swing.JLabel();
-    inputUsername = new PlaceholderTextField("Usuario");
+        jPanel1 = new javax.swing.JPanel();
+        LoginBtn = new javax.swing.JButton();
+        LoginBtn.setBackground(AppColors.PRIMARY_COLOR);
+        LinkRegister = new javax.swing.JLabel();
+        InputPassword = new PlaceholderPasswordField("Contraseña");
+        jLabel1 = new javax.swing.JLabel();
+        inputUsername = new PlaceholderTextField("Usuario");
  ;
-    InputPassword = new PlaceholderPasswordField("Contraseña");
-    LoginBtn = new javax.swing.JButton();
-    LoginBtn.setBackground(AppColors.PRIMARY_COLOR);
-    LinkRegister = new javax.swing.JLabel();
-    LabelAppName = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jPanel2 = new javax.swing.JPanel();
+        LoginLabel = new javax.swing.JLabel();
+        labelImg = new ImageLabel(PATH_IMG_LABEL);
 
-    setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-    setMinimumSize(new java.awt.Dimension(500, 600));
-    getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-    getContentPane().add(IconLabelUser, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 70, 150, 150));
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setBackground(new java.awt.Color(153, 0, 0));
+        setForeground(new java.awt.Color(153, 0, 0));
+        setMinimumSize(new java.awt.Dimension(500, 600));
+        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-    LoginLabel.setFont(new java.awt.Font("Lucida Sans", 1, 36)); // NOI18N
-    LoginLabel.setForeground(new java.awt.Color(48, 162, 251));
-    LoginLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-    LoginLabel.setText("Iniciar Sesión");
-    LoginLabel.setPreferredSize(new java.awt.Dimension(50, 50));
-    getContentPane().add(LoginLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 219, 350, -1));
+        jPanel1.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jPanel1.setLayout(null);
 
-    inputUsername.setFont(new java.awt.Font("Lucida Sans", 0, 14)); // NOI18N
-    inputUsername.setText("Usuario");
-    inputUsername.setPreferredSize(new java.awt.Dimension(55, 40));
-    inputUsername.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        inputUsernameActionPerformed(evt);
-      }
-    });
-    getContentPane().add(inputUsername, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 287, 350, -1));
+        LoginBtn.setFont(new java.awt.Font("Goudy Old Style", 3, 24)); // NOI18N
+        LoginBtn.setForeground(new java.awt.Color(255, 255, 255));
+        LoginBtn.setText("Aceptar");
+        LoginBtn.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        LoginBtn.setPreferredSize(new java.awt.Dimension(55, 40));
+        LoginBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                LoginBtnActionPerformed(evt);
+            }
+        });
+        jPanel1.add(LoginBtn);
+        LoginBtn.setBounds(130, 250, 250, 40);
 
-    InputPassword.setFont(new java.awt.Font("Lucida Sans", 0, 14)); // NOI18N
-    InputPassword.setText("Contraseña");
-    InputPassword.setMinimumSize(new java.awt.Dimension(15, 40));
-    InputPassword.setPreferredSize(new java.awt.Dimension(55, 40));
-    InputPassword.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        InputPasswordActionPerformed(evt);
-      }
-    });
-    getContentPane().add(InputPassword, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 345, 350, -1));
+        LinkRegister.setFont(new java.awt.Font("Goudy Old Style", 2, 18)); // NOI18N
+        LinkRegister.setForeground(new java.awt.Color(51, 51, 51));
+        LinkRegister.setText("¿No tienes una cuenta? Registrate aquí.");
+        LinkRegister.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jPanel1.add(LinkRegister);
+        LinkRegister.setBounds(130, 220, 258, 23);
 
-    LoginBtn.setFont(new java.awt.Font("Lucida Sans", 0, 18)); // NOI18N
-    LoginBtn.setForeground(new java.awt.Color(255, 255, 255));
-    LoginBtn.setText("Aceptar");
-    LoginBtn.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-    LoginBtn.setPreferredSize(new java.awt.Dimension(55, 40));
-    LoginBtn.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        LoginBtnActionPerformed(evt);
-      }
-    });
-    getContentPane().add(LoginBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(129, 503, 250, -1));
+        InputPassword.setFont(new java.awt.Font("Lucida Sans", 0, 14)); // NOI18N
+        InputPassword.setText("Contraseña");
+        InputPassword.setMinimumSize(new java.awt.Dimension(15, 40));
+        InputPassword.setPreferredSize(new java.awt.Dimension(55, 40));
+        InputPassword.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                InputPasswordActionPerformed(evt);
+            }
+        });
+        jPanel1.add(InputPassword);
+        InputPassword.setBounds(80, 150, 350, 40);
 
-    LinkRegister.setFont(new java.awt.Font("Lucida Sans", 0, 14)); // NOI18N
-    LinkRegister.setForeground(new java.awt.Color(204, 204, 204));
-    LinkRegister.setText("¿No tienes una cuenta? Registrate aquí.");
-    LinkRegister.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-    getContentPane().add(LinkRegister, new org.netbeans.lib.awtextra.AbsoluteConstraints(113, 474, -1, -1));
+        jLabel1.setFont(new java.awt.Font("Lucida Bright", 1, 14)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(153, 0, 0));
+        jLabel1.setText("Contraseña:");
+        jPanel1.add(jLabel1);
+        jLabel1.setBounds(90, 120, 86, 17);
 
-    LabelAppName.setFont(new java.awt.Font("Lucida Console", 0, 24)); // NOI18N
-    LabelAppName.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-    LabelAppName.setText("Redcast");
-    LabelAppName.setBackground(AppColors.SECONDARY_COLOR);
-    LabelAppName.setForeground(AppColors.BLACK_COLOR);
-    getContentPane().add(LabelAppName, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 500, 50));
+        inputUsername.setFont(new java.awt.Font("Lucida Sans", 0, 14)); // NOI18N
+        inputUsername.setText("Usuario");
+        inputUsername.setPreferredSize(new java.awt.Dimension(55, 40));
+        inputUsername.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                inputUsernameActionPerformed(evt);
+            }
+        });
+        jPanel1.add(inputUsername);
+        inputUsername.setBounds(80, 60, 350, 40);
 
-    pack();
-  }// </editor-fold>//GEN-END:initComponents
+        jLabel3.setFont(new java.awt.Font("Lucida Bright", 1, 14)); // NOI18N
+        jLabel3.setForeground(new java.awt.Color(153, 0, 0));
+        jLabel3.setText("Usuario:");
+        jPanel1.add(jLabel3);
+        jLabel3.setBounds(90, 30, 70, 17);
+
+        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 270, 510, 330));
+
+        jPanel2.setBackground(new java.awt.Color(153, 0, 51));
+        jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        LoginLabel.setFont(new java.awt.Font("Goudy Old Style", 1, 36)); // NOI18N
+        LoginLabel.setForeground(new java.awt.Color(255, 255, 255));
+        LoginLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        LoginLabel.setText("Iniciar Sesión");
+        LoginLabel.setPreferredSize(new java.awt.Dimension(50, 50));
+        jPanel2.add(LoginLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 210, 510, -1));
+
+        labelImg.setPreferredSize(new java.awt.Dimension(250, 250));
+        jPanel2.add(labelImg, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 10, 240, 210));
+
+        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 510, 600));
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
 
   private void inputUsernameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inputUsernameActionPerformed
     // TODO add your handling code here:
@@ -158,13 +180,16 @@ public class Login extends javax.swing.JFrame {
     MulticastChat.getInstance().setVisible(true);
   }//GEN-LAST:event_LoginBtnActionPerformed
 
-  // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JLabel IconLabelUser;
-  private javax.swing.JPasswordField InputPassword;
-  private javax.swing.JLabel LabelAppName;
-  private javax.swing.JLabel LinkRegister;
-  private javax.swing.JButton LoginBtn;
-  private javax.swing.JLabel LoginLabel;
-  private javax.swing.JTextField inputUsername;
-  // End of variables declaration//GEN-END:variables
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPasswordField InputPassword;
+    private javax.swing.JLabel LinkRegister;
+    private javax.swing.JButton LoginBtn;
+    private javax.swing.JLabel LoginLabel;
+    private javax.swing.JTextField inputUsername;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JLabel labelImg;
+    // End of variables declaration//GEN-END:variables
 }

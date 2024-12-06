@@ -16,6 +16,10 @@ public class MulticastListener implements Runnable {
     System.out.println("Puerto: " + port);
   }
   
+  public MulticastSocket getSocket() {
+    return this.socket;
+  }
+  
   @Override
   public void run() {
     try (MulticastSocket socket = new MulticastSocket(port)){
@@ -23,6 +27,7 @@ public class MulticastListener implements Runnable {
       InetAddress group = InetAddress.getByName(multicastAddress);
       socket.joinGroup(group);
       System.out.println("Escuchando en el grupo multicast: " + multicastAddress);
+      
       byte[] buffer = new byte[1024];
       while(true) {
         DatagramPacket packet = new DatagramPacket(buffer, buffer.length);

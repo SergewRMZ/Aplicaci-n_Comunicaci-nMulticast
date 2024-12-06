@@ -4,8 +4,7 @@ public class ChatRoomDto {
   private String address;
   private int port;
 
-  public ChatRoomDto() {
-  }
+  public ChatRoomDto() {}
   
   public ChatRoomDto(String roomName, String address, int port) {
     this.roomName = roomName;

@@ -33,8 +33,6 @@ public class PlaceholderPasswordField extends JPasswordField {
                 }
             }
         });
-
-        setBorder(BorderFactory.createLineBorder(Color.BLACK));
     }
 
     public boolean isEmpty() {
