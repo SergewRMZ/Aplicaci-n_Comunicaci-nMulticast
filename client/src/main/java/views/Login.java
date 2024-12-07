@@ -3,6 +3,7 @@ import components.ImageLabel;
 import Client.Client;
 import components.PlaceholderPasswordField;
 import components.PlaceholderTextField;
+import dto.ResponseDto;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.JOptionPane;
@@ -163,21 +164,31 @@ public class Login extends javax.swing.JFrame {
     String username = inputUsername.getText();
     String password = InputPassword.getText();
     
-    if(username.isEmpty()) {
+    if(username.isEmpty() && username.equals("Usuario")) {
       JOptionPane.showMessageDialog(this, "Por favor ingresa tu nombre de usuario.", "Error", JOptionPane.ERROR_MESSAGE);
       return;
     }
     
-    if(password.isEmpty()) {
+    if(password.isEmpty() && password.equals("Contraseña")) {
       JOptionPane.showMessageDialog(this, "Por favor ingresa tu contraseña.", "Error", JOptionPane.ERROR_MESSAGE);
+      return;
     }
     
     // Enviar datos al servidor
     Client client = Client.getInstanceClient();
-    String response = client.loginUser(username, password);
-    JOptionPane.showMessageDialog(this, response, "Success", JOptionPane.INFORMATION_MESSAGE);
-    setVisible(false);
-    MulticastChat.getInstance().setVisible(true);
+    ResponseDto response = client.loginUser(username, password);
+    
+    if(response.getError()) {
+        JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    }
+    
+    else {
+        JOptionPane.showMessageDialog(this, response.getMessage(), "Success", JOptionPane.INFORMATION_MESSAGE);
+        setVisible(false);
+        MulticastChat.getInstance().setVisible(true);
+    }
+    
+    
   }//GEN-LAST:event_LoginBtnActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

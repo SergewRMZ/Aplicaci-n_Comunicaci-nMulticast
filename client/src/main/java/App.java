@@ -1,5 +1,4 @@
-//import com.formdev.flatlaf.FlatDarkLaf;
-//import com.formdev.flatlaf.FlatLightLaf;
+import com.formdev.flatlaf.FlatLightLaf;
 import java.util.Scanner;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -12,7 +11,7 @@ public class App {
   public static void main(String[] args) {
     SwingUtilities.invokeLater(() -> {
       try {
-        //UIManager.setLookAndFeel(new FlatDarkLaf());
+        UIManager.setLookAndFeel(new FlatLightLaf());
         UIManager.put("Panel.arc", 100);
         Login main = Login.getInstanceLogin();
         SwingUtilities.updateComponentTreeUI(main);

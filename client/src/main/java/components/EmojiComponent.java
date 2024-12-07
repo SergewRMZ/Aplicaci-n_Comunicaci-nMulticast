@@ -22,7 +22,7 @@ public class EmojiComponent extends javax.swing.JPanel {
   }
   
   private void setIconEmoji () {
-    this.labelEmojiIcon.setIcon(FontAwesomeIcons.EmojiIcon(40));
+    this.labelEmojiIcon.setIcon(FontAwesomeIcons.EmojiIcon(20));
     this.labelEmojiIcon.setHorizontalAlignment(SwingConstants.CENTER);
     this.labelEmojiIcon.setVerticalAlignment(SwingConstants.CENTER);
   }
@@ -39,7 +39,7 @@ public class EmojiComponent extends javax.swing.JPanel {
         labelEmojiIcon = new javax.swing.JLabel();
 
         setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-        add(labelEmojiIcon, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 100, 100));
+        add(labelEmojiIcon, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 40, 40));
     }// </editor-fold>//GEN-END:initComponents
 
 

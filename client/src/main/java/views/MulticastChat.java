@@ -1,6 +1,7 @@
 package views;
 
 import components.ImageLabel;
+import components.PlaceholderTextField;
 import utils.AppColors;
 
 public class MulticastChat extends javax.swing.JFrame {
@@ -40,10 +41,12 @@ public class MulticastChat extends javax.swing.JFrame {
         BtnGroup1 = new javax.swing.JButton();
         userInfoComponent = new components.UserInfoComponent();
         ContainerMessage = new javax.swing.JPanel();
-        textFieldMessage = new javax.swing.JTextField();
+        textFieldMessage = new PlaceholderTextField("Escribe un mensaje...");
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
+        jPanel2 = new javax.swing.JPanel();
+        jPanel3 = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -109,7 +112,6 @@ public class MulticastChat extends javax.swing.JFrame {
         textFieldMessage.setBackground(new java.awt.Color(190, 190, 190));
         textFieldMessage.setFont(new java.awt.Font("Lucida Sans", 0, 18)); // NOI18N
         textFieldMessage.setForeground(new java.awt.Color(255, 255, 255));
-        textFieldMessage.setText("Enviar mensaje");
         textFieldMessage.setBorder(null);
         textFieldMessage.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -145,6 +147,37 @@ public class MulticastChat extends javax.swing.JFrame {
         );
 
         PanelChat.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 0, 780, 50));
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 112, Short.MAX_VALUE)
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 112, Short.MAX_VALUE)
+        );
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGap(281, 281, 281)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(377, Short.MAX_VALUE))
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGap(147, 147, 147)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(311, Short.MAX_VALUE))
+        );
+
+        jScrollPane1.setViewportView(jPanel2);
+
         PanelChat.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 60, 760, 560));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -154,7 +187,7 @@ public class MulticastChat extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(PanelChat, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                .addGap(52, 52, 52))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -220,6 +253,8 @@ public class MulticastChat extends javax.swing.JFrame {
     private javax.swing.JPanel PanelLateral;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel labelImg;
     private javax.swing.JPanel panelGroups;

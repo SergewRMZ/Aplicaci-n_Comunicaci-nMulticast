@@ -18,8 +18,9 @@ public class FontAwesomeIcons {
   }
   
     public static Icon EmojiIcon(int size) {
-        FontIcon icon = FontIcon.of(FontAwesomeSolid.HAT_COWBOY, size);
+        FontIcon icon = FontIcon.of(FontAwesomeSolid.BLIND, size);
         icon.setIconColor(AppColors.PRIMARY_COLOR);
         return icon;
     }
+    
 }

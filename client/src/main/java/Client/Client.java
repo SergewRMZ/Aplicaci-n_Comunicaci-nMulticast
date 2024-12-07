@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dto.ChatRoomDto;
+import dto.ResponseDto;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
@@ -86,7 +87,7 @@ public class Client {
     return null; // Si no hay respuesta devuelve null
   } // RegisterUser
   
-  public String loginUser (String username, String password) {
+  public ResponseDto loginUser (String username, String password) {
     try {
       JsonObject data = new JsonObject();
       data.addProperty("action", "login");
@@ -103,13 +104,13 @@ public class Client {
         this.idUser = jsonResponse.get("id").getAsString();
         
         String message = jsonResponse.get("message").getAsString();
-        return message;
+        return new ResponseDto(false, message);
       }
       
       else {
         if (jsonResponse.get("status").getAsString().equals("error")) {
           String message = jsonResponse.get("message").getAsString();
-          return message;
+          return new ResponseDto(true, message);
         }
       }
     } catch (Exception e) {

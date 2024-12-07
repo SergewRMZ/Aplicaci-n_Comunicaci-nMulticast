@@ -25,6 +25,7 @@ components\RoundedBorder.class
 utils\FontAwesomeIcons.class
 views\Login$3.class
 threads\MulticastListener.class
+dto\ResponseDto.class
 views\Register$4.class
 views\Login$4.class
 views\MulticastChat.class

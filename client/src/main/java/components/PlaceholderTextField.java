@@ -18,7 +18,7 @@ public class PlaceholderTextField extends JTextField {
             public void focusGained(FocusEvent e) {
                 if (getText().equals(placeholderText)) {
                     setText("");
-                    setForeground(Color.WHITE);
+                    setForeground(Color.GRAY);
                 }
             }
 
