@@ -27,7 +27,7 @@ public class GetUserChatRoomsCommand implements Command {
     int idUser = data.get("idUser").getAsInt();
     List<ChatRoomDto> userChats = new ArrayList<>();
     userChats = chatRoomRepository.getUserGroups(idUser);
-    if(userChats != null) {
+    if(userChats != null && !userChats.isEmpty()) {
       response.addProperty("status", "success");
       for(ChatRoomDto chat : userChats) {
         Gson gson = new Gson();

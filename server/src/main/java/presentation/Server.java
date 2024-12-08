@@ -13,16 +13,13 @@ import java.util.concurrent.Executors;
 import presentation.comands.CommandFactory;
 public class Server {
   private static final int SERVER_PORT = 8000;
-  private static final int CLIENT_PORT = 5000;
   
   private MulticastSocket socket;
   private static Server instance;  
   private ExecutorService threadPool;
-  private Gson gson = null;
   private Server () {
     try {
       socket = new MulticastSocket(SERVER_PORT);
-      gson = new GsonBuilder().setPrettyPrinting().create();
       threadPool = Executors.newFixedThreadPool(16);
       DatabaseInitializer.initialize();
       System.out.println("Servidor multicast iniciado en puerto: " + SERVER_PORT);
@@ -33,7 +30,9 @@ public class Server {
   
   public static Server getInstanceServer () {
     if (instance == null) {
-      instance = new Server();
+      synchronized (Server.class) {
+        if (instance == null) instance = new Server();
+      }
     } 
     return instance;
   }
@@ -73,9 +72,10 @@ public class Server {
       String message = new String(packet.getData(), 0, packet.getLength());
       JsonObject json = JsonParser.parseString(message).getAsJsonObject();
       String action = json.get("action").getAsString();
-
+      
       JsonObject jsonResponse = CommandFactory.createCommand(action, json);
       send(jsonResponse, packet.getPort(), packet.getAddress());
+      
     } catch (Exception e) {
       e.printStackTrace();
     }

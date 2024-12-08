@@ -15,7 +15,7 @@ public class CommandFactory {
     Command command;
     switch (action) {
       case "register" -> command = new RegisterUserCommand(data, userRepository);
-      case "login" -> command = new LoginUserCommand(data, userRepository);
+      case "login" -> command = new LoginUserCommand(data, userRepository, chatRoomRepository);
       case "createRoom" -> command = new CreateChatRoomCommand(data, chatRoomRepository);
       case "getRooms" -> command = new GetChatRoomsCommand(data, chatRoomRepository);
       case "joinRoom" -> command = new JoinChatRoomCommand(data, chatRoomRepository);

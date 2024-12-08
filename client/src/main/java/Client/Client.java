@@ -7,8 +7,6 @@ import dto.ChatRoomDto;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import threads.MulticastListener;
@@ -88,12 +86,14 @@ public class Client {
   
   public String loginUser (String username, String password) {
     try {
+      String port = String.valueOf(String.valueOf(socketClient.getPort()));
       JsonObject data = new JsonObject();
       data.addProperty("action", "login");
       JsonObject user = new JsonObject();
       user.addProperty("username", username);
       user.addProperty("password", password);
       data.add("user", user);
+      data.addProperty("port", port);
       
       sendRequest(data);
       String response = getServerResponse();
@@ -128,7 +128,7 @@ public class Client {
       byte[] data = jsonMessage.toString().getBytes();
       DatagramPacket packet = new DatagramPacket(data, data.length, InetAddress.getByName(chatRoom.getAddress()), chatRoom.getPort());
       socketClient.send(packet);
-      System.out.println("Mensaje enviado");
+      System.out.println("Mensaje enviado al grupo multicast");
     } catch (Exception e) {
     }
   }
@@ -167,6 +167,7 @@ public class Client {
         
         else if(status.equals("not_found")) {
           System.out.println("No te has unido al grupo");
+          // Preguntar si desea unirse a un grupo
         }
       }
     } catch (Exception e) {
@@ -199,9 +200,11 @@ public class Client {
       
       String response = getServerResponse();
       JsonObject jsonResponse = JsonParser.parseString(response).getAsJsonObject();
+      System.out.println(jsonResponse);
       if(jsonResponse.has("status")) {
         String status = jsonResponse.get("status").getAsString();
         if("success".equals(status)) {
+          System.out.println("Cargando grupo...");
           if(jsonResponse.has("groupAddress")) {
             String groupAddress = jsonResponse.get("groupAddress").getAsString();
             String multicastAddress = groupAddress.split(":")[0];

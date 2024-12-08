@@ -9,6 +9,7 @@ views\MulticastChat$1.class
 components\ImageLabel.class
 views\Login.class
 views\Register$3.class
+TestClients.class
 utils\ImageLoader.class
 views\Register.class
 views\MulticastChat$4.class

@@ -8,6 +8,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,9 +25,10 @@ public class SqliteChatRoomRepository implements ChatRoomRepository {
   private final String VERIFY_USER_EXISTS_GROUP = "SELECT COUNT(*) FROM group_members WHERE group_id = ? AND user_id = ?";
   
   private final String GET_USER_GROUPS = "SELECT g.group_name, g.multicast_address, g.port FROM groups g JOIN group_members gm ON g.id = gm.group_id WHERE gm.user_id = ?";
+  private final Lock lock = new ReentrantLock();
   
   /**
-   * Verificar si una dirección multicast ya está asignada
+   * Verificar si una dirección multicast ya está asignada a algún grupo
    * @param roomAddress: Dirección multicast.
    * @return 
    */
@@ -148,7 +151,8 @@ public class SqliteChatRoomRepository implements ChatRoomRepository {
    * @return 
    */
   @Override
-  public synchronized boolean addUserToGroup(int userId, int groupId) {
+  public boolean addUserToGroup(int userId, int groupId) {
+    lock.lock();
     try (
       Connection conn = DatabaseConfig.getConnection();
       PreparedStatement pstmt = conn.prepareStatement(VERIFY_USER_EXISTS_GROUP);  
@@ -171,6 +175,8 @@ public class SqliteChatRoomRepository implements ChatRoomRepository {
     } catch (SQLException e) {
       e.printStackTrace();
       return false;
+    } finally {
+      lock.unlock();
     }
   }
 

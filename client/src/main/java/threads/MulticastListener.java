@@ -1,5 +1,7 @@
 package threads;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
@@ -33,6 +35,9 @@ public class MulticastListener implements Runnable {
         DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
         socket.receive(packet);
         System.out.println("Mensaje recibido: " + new String(packet.getData(), 0, packet.getLength()));
+        String message = new String(packet.getData(), 0, packet.getLength());
+        JsonObject messageJson = JsonParser.parseString(message).getAsJsonObject();
+        
       }
     } catch (Exception e) {
       e.printStackTrace();

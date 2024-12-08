@@ -3,7 +3,7 @@ import java.util.Scanner;
 public class Test2 {
   public static void main (String args[]) {
     Client client = Client.getInstanceClient();
-    client.loginUser("Denia", "1234");
+    client.loginUser("Sergew", "1234");
     client.joinChatRoom("Gamers");
     client.getUserGroup();
     
@@ -14,7 +14,6 @@ public class Test2 {
         System.out.println("Saliendo...");
         break;
       }
-      
       client.sendMessage(message);
     }
     
