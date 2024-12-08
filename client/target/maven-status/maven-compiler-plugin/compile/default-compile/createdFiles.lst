@@ -1,3 +1,4 @@
+components\EmojiComponent.class
 views\Login$2.class
 App.class
 components\PlaceholderPasswordField$1.class
@@ -12,7 +13,10 @@ views\Register$3.class
 TestClients.class
 utils\ImageLoader.class
 views\Register.class
+<<<<<<< HEAD
 views\MulticastChat$4.class
+=======
+>>>>>>> 9bae737d6593097240b89457065490c7763e4127
 dto\ChatRoomDto.class
 views\Register$2.class
 components\PlaceholderPasswordField.class
@@ -26,9 +30,9 @@ components\RoundedBorder.class
 utils\FontAwesomeIcons.class
 views\Login$3.class
 threads\MulticastListener.class
+dto\ResponseDto.class
 views\Register$4.class
 views\Login$4.class
 views\MulticastChat.class
 views\Login$1.class
 components\PlaceholderTextField$1.class
-views\MulticastChat$5.class

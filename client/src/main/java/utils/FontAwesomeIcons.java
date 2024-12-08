@@ -13,7 +13,14 @@ public class FontAwesomeIcons {
   
   public static Icon backIcon(int size) {
     FontIcon icon = FontIcon.of(FontAwesomeSolid.ARROW_LEFT, size);
-    icon.setIconColor(AppColors.SECONDARY_COLOR);
+    icon.setIconColor(AppColors.PRIMARY_COLOR);
     return icon;
   }
+  
+    public static Icon EmojiIcon(int size) {
+        FontIcon icon = FontIcon.of(FontAwesomeSolid.BLIND, size);
+        icon.setIconColor(AppColors.PRIMARY_COLOR);
+        return icon;
+    }
+    
 }

@@ -19,7 +19,7 @@ public class PlaceholderPasswordField extends JPasswordField {
             public void focusGained(FocusEvent e) {
                 if (getText().equals(placeholderText)) {
                     setText("");  
-                    setForeground(Color.WHITE);  
+                    setForeground(Color.GRAY);  
                     setEchoChar('*');  
                 }
             }
@@ -33,8 +33,6 @@ public class PlaceholderPasswordField extends JPasswordField {
                 }
             }
         });
-
-        setBorder(BorderFactory.createLineBorder(Color.BLACK));
     }
 
     public boolean isEmpty() {
