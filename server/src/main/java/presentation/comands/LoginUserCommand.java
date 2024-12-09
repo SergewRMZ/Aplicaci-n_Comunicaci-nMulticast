@@ -26,7 +26,7 @@ public class LoginUserCommand implements Command {
     String username = data.getAsJsonObject("user").get("username").getAsString();
     String password = data.getAsJsonObject("user").get("password").getAsString();
     int port = data.get("port").getAsInt();
-    
+    System.out.println("Puerto recibido " + port);
     UserDto user = new UserDto(username, password);
     String id = UserRepository.loginUser(user);
     if (id != null) {
@@ -37,6 +37,7 @@ public class LoginUserCommand implements Command {
       
       response.addProperty("status", "success");
       response.addProperty("id", id);
+      response.addProperty("username", username);
       response.addProperty("message", "Login successful");
     }
 

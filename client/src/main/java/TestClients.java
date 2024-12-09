@@ -1,7 +1,7 @@
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import Client.Client;
+import controller.Client;
 import java.util.UUID;
 public class TestClients {
   public static void main(String args[]) {

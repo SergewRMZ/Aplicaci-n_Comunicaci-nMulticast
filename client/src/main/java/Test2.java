@@ -1,4 +1,4 @@
-import Client.Client;
+import controller.Client;
 import java.util.Scanner;
 public class Test2 {
   public static void main (String args[]) {

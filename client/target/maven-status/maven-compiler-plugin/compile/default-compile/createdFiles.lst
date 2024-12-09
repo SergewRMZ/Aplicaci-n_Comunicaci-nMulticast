@@ -3,20 +3,15 @@ views\Login$2.class
 App.class
 components\PlaceholderPasswordField$1.class
 Test.class
-Client\Client.class
-views\MulticastChat$3.class
 views\Register$1.class
 views\MulticastChat$1.class
 components\ImageLabel.class
+model\UserModel.class
 views\Login.class
 views\Register$3.class
 TestClients.class
 utils\ImageLoader.class
 views\Register.class
-<<<<<<< HEAD
-views\MulticastChat$4.class
-=======
->>>>>>> 9bae737d6593097240b89457065490c7763e4127
 dto\ChatRoomDto.class
 views\Register$2.class
 components\PlaceholderPasswordField.class
@@ -34,5 +29,6 @@ dto\ResponseDto.class
 views\Register$4.class
 views\Login$4.class
 views\MulticastChat.class
+controller\Client.class
 views\Login$1.class
 components\PlaceholderTextField$1.class

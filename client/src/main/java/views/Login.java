@@ -1,6 +1,6 @@
 package views;
 import components.ImageLabel;
-import Client.Client;
+import controller.Client;
 import components.PlaceholderPasswordField;
 import components.PlaceholderTextField;
 import dto.ResponseDto;
@@ -9,6 +9,7 @@ import java.awt.event.MouseEvent;
 import javax.swing.JOptionPane;
 import utils.FontAwesomeIcons;
 import javax.swing.SwingConstants;
+import model.UserModel;
 import utils.AppColors;
 public class Login extends javax.swing.JFrame {
   private static Login instance;
@@ -185,10 +186,11 @@ public class Login extends javax.swing.JFrame {
     else {
         JOptionPane.showMessageDialog(this, response.getMessage(), "Success", JOptionPane.INFORMATION_MESSAGE);
         setVisible(false);
+        client.getUserGroup();
+        UserModel userModel = (UserModel) response.getObject();
+        MulticastChat.getInstance().setUserModel(userModel);
         MulticastChat.getInstance().setVisible(true);
     }
-    
-    
   }//GEN-LAST:event_LoginBtnActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -1,7 +1,4 @@
 package presentation;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import config.DatabaseInitializer;
@@ -20,7 +17,14 @@ public class Server {
   private Server () {
     try {
       socket = new MulticastSocket(SERVER_PORT);
+      
+      // Inicializar alberca de hilos
       threadPool = Executors.newFixedThreadPool(16);
+      
+      // Establecemos el socker del servidor, para tener una única instancia.
+      MulticastSender.getInstance().setSocket(socket);
+      
+      // Inicializar la base de datos
       DatabaseInitializer.initialize();
       System.out.println("Servidor multicast iniciado en puerto: " + SERVER_PORT);
       listen();

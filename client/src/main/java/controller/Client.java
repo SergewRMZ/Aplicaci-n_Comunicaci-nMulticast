@@ -1,4 +1,4 @@
-package Client;
+package controller;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -8,10 +8,9 @@ import dto.ResponseDto;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import model.UserModel;
 import threads.MulticastListener;
 
 public class Client {
@@ -19,13 +18,13 @@ public class Client {
   private static Client instance;
   private Gson gson;
   private int port = 8000;
+  private int CLIENT_PORT;
   private final String SERVER_HOST = "127.0.0.1";
   private MulticastSocket socketClient;
   private InetAddress serverAddress;
   
   // Datos del Usuario
-  private String username;
-  private String idUser;
+  private UserModel user;
   
   // ALBERCA DE HILOS
   private ExecutorService threadPool;
@@ -37,7 +36,10 @@ public class Client {
   private Client() {
     try {
       socketClient = new MulticastSocket();
+      socketClient.setLoopbackMode(false);
+      socketClient.setTimeToLive(255);
       serverAddress = InetAddress.getByName(SERVER_HOST);
+      CLIENT_PORT = socketClient.getLocalPort();
       this.gson = new Gson();
       this.threadPool = Executors.newFixedThreadPool(MAX_CHATROOMS);
       System.out.println("Cliente unido al servidor " + SERVER_HOST);
@@ -53,8 +55,8 @@ public class Client {
     return instance;
   }
   
-  public String getUsername() {
-    return this.username;
+  public UserModel getUser() {
+    return this.user;
   }
   
   public String registerUser(String username, String password) {
@@ -89,30 +91,28 @@ public class Client {
   
   public ResponseDto loginUser (String username, String password) {
     try {
-      String port = String.valueOf(String.valueOf(socketClient.getPort()));
       JsonObject data = new JsonObject();
       data.addProperty("action", "login");
       JsonObject user = new JsonObject();
       user.addProperty("username", username);
       user.addProperty("password", password);
       data.add("user", user);
-      data.addProperty("port", port);
+      data.addProperty("port", socketClient.getLocalPort());
       
       sendRequest(data);
       String response = getServerResponse();
+      System.out.println(response);
       JsonObject jsonResponse = JsonParser.parseString(response).getAsJsonObject();
       if (jsonResponse.has("status") && jsonResponse.get("status").getAsString().equals("success")) {
-        this.username = username;
-        this.idUser = jsonResponse.get("id").getAsString();
-        
+        this.user = new UserModel(jsonResponse.get("id").getAsString(), jsonResponse.get("username").getAsString());
         String message = jsonResponse.get("message").getAsString();
-        return new ResponseDto(false, message);
+        return new ResponseDto(false, message, this.user);
       }
       
       else {
         if (jsonResponse.get("status").getAsString().equals("error")) {
           String message = jsonResponse.get("message").getAsString();
-          return new ResponseDto(true, message);
+          return new ResponseDto(true, message, null);
         }
       }
     } catch (Exception e) {
@@ -126,7 +126,7 @@ public class Client {
     try {
       JsonObject jsonMessage = new JsonObject();
       jsonMessage.addProperty("action", "message");
-      jsonMessage.addProperty("user", this.username);
+      jsonMessage.addProperty("user", this.user.getUsername());
       jsonMessage.addProperty("message", message);
       byte[] data = jsonMessage.toString().getBytes();
       DatagramPacket packet = new DatagramPacket(data, data.length, InetAddress.getByName(chatRoom.getAddress()), chatRoom.getPort());
@@ -136,24 +136,11 @@ public class Client {
     }
   }
   
-  public void getChatRooms() {
-    try {
-      JsonObject request = new JsonObject();
-      request.addProperty("action", "getRooms");
-      sendRequest(request);
-      String response = getServerResponse();
-      JsonObject jsonResponse = gson.fromJson(response, JsonObject.class);
-      System.out.println(jsonResponse);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-  
   public void getUserGroup () {
     try {
       JsonObject request = new JsonObject();
       request.addProperty("action", "getUserGroups");
-      request.addProperty("idUser", idUser);
+      request.addProperty("idUser", user.getUserId());
       sendRequest(request);
       String response = getServerResponse();
       JsonObject jsonResponse = gson.fromJson(response, JsonObject.class);
@@ -164,8 +151,8 @@ public class Client {
           JsonObject groupJson = jsonResponse.getAsJsonObject("group");
           this.chatRoom = gson.fromJson(groupJson, ChatRoomDto.class);
           
-          // Inicio de hilo para escuchar en el grupo
-          this.threadPool.submit(new MulticastListener(chatRoom.getAddress(), chatRoom.getPort()));
+          // Inicio de hilo para escuchar en el grupo, dirección de grupo, puerto de grupo y puerto de usuario.
+          this.threadPool.submit(new MulticastListener(chatRoom.getAddress(), chatRoom.getPort(), this.CLIENT_PORT));
         }
         
         else if(status.equals("not_found")) {
@@ -178,27 +165,13 @@ public class Client {
     }
   }
   
-  /**
-   * Método para solicitar al servidor la creación de un nuevo grupo
-   * @param roomName Nombre del grupo
-   */
-  public void createChatRoom(String roomName) {
-    try {
-      JsonObject request = new JsonObject();
-      request.addProperty("action", "createRoom");
-      request.addProperty("roomName", roomName);
-      sendRequest(request);
-    } catch (Exception e) {
-    }
-  }
-  
   public void joinChatRoom(String roomName) {
     try {
       JsonObject request = new JsonObject();
       request.addProperty("action", "joinRoom");
       request.addProperty("roomName", roomName);
-      request.addProperty("username", username);
-      request.addProperty("id", idUser);
+      request.addProperty("username", user.getUsername());
+      request.addProperty("id", user.getUserId());
       sendRequest(request);
       
       String response = getServerResponse();
@@ -212,7 +185,7 @@ public class Client {
             String groupAddress = jsonResponse.get("groupAddress").getAsString();
             String multicastAddress = groupAddress.split(":")[0];
             int port = Integer.parseInt(groupAddress.split(":")[1]);
-            this.threadPool.submit(new MulticastListener(multicastAddress, port));
+            this.threadPool.submit(new MulticastListener(multicastAddress, port, this.CLIENT_PORT));
           }
         } 
       }

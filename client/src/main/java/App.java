@@ -13,6 +13,7 @@ public class App {
       try {
         UIManager.setLookAndFeel(new FlatLightLaf());
         UIManager.put("Panel.arc", 100);
+        UIManager.put("Component.arc", 100);
         Login main = Login.getInstanceLogin();
         SwingUtilities.updateComponentTreeUI(main);
         main.setVisible(true);
