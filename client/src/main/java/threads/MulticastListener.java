@@ -14,6 +14,7 @@ public class MulticastListener implements Runnable {
   private final int port;
   private final int clientPort;
   private MulticastSocket socket;
+  
   public MulticastListener(String multicastAddress, int port, int clientPort) {
     this.multicastAddress = multicastAddress;
     this.port = port;
@@ -66,9 +67,21 @@ public class MulticastListener implements Runnable {
     }
   }
   
+  public void closeSocket() {
+    if (socket != null && !socket.isClosed()) {
+      try {
+        InetAddress group = InetAddress.getByName(multicastAddress);
+        socket.leaveGroup(group);
+        socket.close();
+        System.out.println("Socket multicast cerrado correctamente");
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+  }
+  
   private void handleNotifyUserConnected(JsonObject messageJson) {
     JsonArray users = messageJson.getAsJsonArray("users");
-    System.out.println(users);
     for(JsonElement user : users) {
       JsonObject userJson = user.getAsJsonObject();
       String username = userJson.get("username").getAsString();
@@ -78,7 +91,8 @@ public class MulticastListener implements Runnable {
   }
   
   private void handleMessageMulticast(JsonObject messageJson) {
+    String username = messageJson.get("username").getAsString();
     String message = messageJson.get("message").getAsString(); // Obtener el mensaje
-    MulticastChat.getInstance().addMessage(message, false);
+    MulticastChat.getInstance().addMessage(username, message, false);
   }
 }

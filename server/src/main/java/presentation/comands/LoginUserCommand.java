@@ -30,8 +30,9 @@ public class LoginUserCommand implements Command {
     UserDto user = new UserDto(username, password);
     String id = UserRepository.loginUser(user);
     if (id != null) {
+      
       // Agregar el usuario a la lista de conexiones y obtener sus grupos
-      UserModel userModel = new UserModel(id, username, password, port);
+      UserModel userModel = new UserModel(id, username, port);
       List<ChatRoomDto> chatRooms = chatRoomRepository.getUserGroups(Integer.parseInt(id));
       SessionManager.getInstance().addActiveUser(userModel, chatRooms);
       

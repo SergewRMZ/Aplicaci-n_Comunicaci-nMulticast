@@ -2,9 +2,12 @@ package presentation;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+
 import domain.dto.ChatRoomDto;
 import domain.models.UserModel;
+
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,41 +42,49 @@ public class SessionManager {
     try {
       activeSessions.put(userModel, chatRooms);
       sendActiveUserList();
-      System.out.println("Usuario " + userModel.username + " conectado del puerto " + userModel.port);
+      System.out.println("Usuario " + userModel.getUsername() + " conectado del puerto " + userModel.getPort());
     } finally {
       lock.unlock();
     }
   }
 
+  /**
+   * Método para eliminar un usuario de la lista de usuarios activos. Se ejecuta
+   * cuando un usuario decide cerrar la sesión.
+   * @param userModel 
+   */
   public void removeActiveUser(UserModel userModel) {
     lock.lock();
     try {
       activeSessions.remove(userModel);
-      System.out.println("Usuario " + userModel.username + "deconectado");
+      sendActiveUserList();
+      System.out.println("Usuario " + userModel.getUsername() + " deconectado");
     } finally {
       lock.unlock();
     }
   }
   
-  private void notifyGroupMembers (UserModel userModel, List<ChatRoomDto> chatRooms) {
-    for(ChatRoomDto chatRoom: chatRooms) {
-      try {
-        JsonObject notification = new JsonObject();
-        notification.addProperty("action", "notify");
-        notification.addProperty("status", "user-connected");
-        notification.addProperty("username", userModel.username);
-
-        InetAddress multicastAddress = InetAddress.getByName(chatRoom.getAddress());
-        int multicastPort = chatRoom.getPort();
-        
-        MulticastSender ms = MulticastSender.getInstance();
-        ms.sendMessage(notification, multicastAddress, multicastPort);
-      } catch (Exception e) {
-        e.printStackTrace();
+  /**
+   * Método para obtener todos los usuarios que están activos.
+   * @return Una lista de usuarios si es que existe un usuario en sesión.
+   */
+  public List<String> getActiveUserList() {
+    if(!activeSessions.isEmpty()) {
+      List<String> users = new ArrayList<>();
+      for(UserModel userModel : activeSessions.keySet()) {
+        users.add(userModel.getUsername());
       }
+      
+      return users;
     }
+    
+    return null;
   }
   
+  /**
+   * Este método se invoca siempre que un usuario inicia sesión. Al iniciar sesión, 
+   * el servidor envia la lista de usuarios conectados actualizada.
+   */
   private void sendActiveUserList() {
     JsonObject activeUsersList = new JsonObject();
     activeUsersList.addProperty("action", "users-list");
@@ -81,9 +92,8 @@ public class SessionManager {
     JsonArray usersArray = new JsonArray();
     for(UserModel user : activeSessions.keySet()) {
       JsonObject userObject = new JsonObject();
-      userObject.addProperty("username", user.username);
-      System.out.println(user.port);
-      userObject.addProperty("port", user.port);
+      userObject.addProperty("username", user.getUsername());
+      userObject.addProperty("port", user.getPort());
       
       // Agregar el objecto de usuario
       usersArray.add(userObject);

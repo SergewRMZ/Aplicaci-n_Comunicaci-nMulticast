@@ -7,8 +7,6 @@ import dto.ResponseDto;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.JOptionPane;
-import utils.FontAwesomeIcons;
-import javax.swing.SwingConstants;
 import model.UserModel;
 import utils.AppColors;
 public class Login extends javax.swing.JFrame {

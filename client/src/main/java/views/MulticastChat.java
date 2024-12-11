@@ -4,13 +4,17 @@ import com.formdev.flatlaf.util.UIScale;
 import components.ImageLabel;
 import components.PlaceholderTextField;
 import controller.Client;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.FlowLayout;
 import java.awt.Font;
+import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JScrollBar;
+import javax.swing.JPanel;
 import model.UserModel;
 import utils.AppColors;
 
@@ -19,18 +23,19 @@ public class MulticastChat extends javax.swing.JFrame {
   private UserModel userModel;
   private final String PATH_IMG_LABEL = "/logo.png";
   
+  
   private MulticastChat() {
     initComponents();
     setLocationRelativeTo(null);
     pane.setLayout(new BoxLayout(pane, BoxLayout.Y_AXIS));
     paneFriends.setLayout(new BoxLayout(paneFriends, BoxLayout.Y_AXIS));
+    setUsersOnline();
   }
   
-  public void setUserModel (UserModel userModel) {
-    this.userModel = userModel;
-    this.userInfoComponent.setUsernameLabel(userModel.getUsername());
-  }
-  
+  /**
+   * Patrón singleton para obtener una única instancia de MulticastChat
+   * @return MulticastChat
+   */
   public static MulticastChat getInstance() {
     if(instance == null) {
       instance = new MulticastChat();
@@ -39,6 +44,35 @@ public class MulticastChat extends javax.swing.JFrame {
     return instance;
   }
   
+  /**
+   * Método para establecer los usuarios en linea. Realiza una petición get al servidor
+   * el cual devuelve la lista de usuarios activos.
+   */
+  private void setUsersOnline() {
+    Client client = Client.getInstanceClient();
+    List<String> usersOnline = client.getUsersOnline();
+    
+    if(usersOnline!=null) {
+      for(String username: usersOnline) {
+        addUser(username);
+      }
+    }
+  }
+  
+  /**
+   * Método público para establecer los parámetros clave del usuario, como 
+   * su nombre e identificador.
+   * @param userModel 
+   */
+  public void setUserModel (UserModel userModel) {
+    this.userModel = userModel;
+    this.userInfoComponent.setUsernameLabel(userModel.getUsername());
+  }
+  
+  /**
+   * Método se llama para agregar un nuevo usuario en la lista de usuarios conectados de la interfaz
+   * @param username Nombre del usuario en línea.
+   */
   public void addUser(String username) {
     JLabel userLabel = new JLabel(username);
     userLabel.setFont(new Font("Lucida Sans", 0, 16));
@@ -49,35 +83,66 @@ public class MulticastChat extends javax.swing.JFrame {
     userLabel.setAlignmentX(JComponent.CENTER_ALIGNMENT);
     paneFriends.add(Box.createVerticalStrut(5));
     paneFriends.add(userLabel);
-    // pane.revalidate();
-    pane.repaint();
+    paneFriends.revalidate();
+    paneFriends.repaint();
   }
   
+  /**
+   * Este método se llama para limpiar la lista de usuarios en línea y 
+   * posteriormente actualizarla
+   */
   public void clearUsersList() {
     paneFriends.removeAll();
     paneFriends.revalidate();
     paneFriends.repaint();
   }
   
-  public void addMessage(String message, boolean alignRight) {
+  /**
+   * Este método se implementa para poder agregar un mensaje en la vista.
+   * Se agrega el mensaje del lado derecho cuando el mensaje pertenece al usuario
+   * y se agrega del lado izquierdo cuando el mensaje es un mensaje externo.
+   * @param username Nombre de usuario que envió el mensaje
+   * @param message Mensaje del usuario
+   * @param alignRight Alinear dependiendo el tipo de mensaje
+   */
+  public void addMessage(String username, String message, boolean alignRight) {
+    JLabel usernameLabel = new JLabel(username);
+    usernameLabel.setFont(new Font("Lucida Sans", Font.PLAIN, 16));
+    usernameLabel.setForeground(AppColors.getGRAY_COLOR());
+    usernameLabel.setBackground(AppColors.getWHITE_COLOR());
+    
+    // Crear etiqueta para el mensaje
     JLabel messageLabel = new JLabel(message);
-    messageLabel.setFont(new Font("Lucida Sans", 0, 16));
+    messageLabel.setFont(new Font("Lucida Sans", Font.PLAIN, 16));
     messageLabel.setForeground(AppColors.getWHITE_COLOR());
-    messageLabel.setBackground(AppColors.getPRIMARY_COLOR());
     messageLabel.setOpaque(true);
     messageLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
-   
-    // Alinear mensaje dependiendo si es propio o externo.
-    if(alignRight)
-      messageLabel.setAlignmentX(JComponent.RIGHT_ALIGNMENT);
-    else 
-      messageLabel.setAlignmentX(JComponent.LEFT_ALIGNMENT);
+
+    // Crear contenedor para el mensaje
+    JPanel messagePanel = new JPanel();
+    messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.Y_AXIS));
     
-    pane.add(Box.createVerticalStrut(10)); 
-    pane.add(messageLabel);
+    if (alignRight) {
+        messageLabel.setBackground(AppColors.getPRIMARY_COLOR());
+    } else {
+        messageLabel.setBackground(AppColors.getSECONDARY_COLOR());
+        
+    }
+    
+    messagePanel.setOpaque(true);
+    messagePanel.setBackground(Color.GREEN);
+    
+    // Agregar usuario y mensaje.
+    messagePanel.add(usernameLabel);
+    messagePanel.add(Box.createVerticalStrut(5));
+    messagePanel.add(messageLabel);
+    
+    pane.add(messagePanel);
+    pane.add(Box.createVerticalStrut(10));
     pane.revalidate();
     pane.repaint();
   }
+
   
   /**
    * This method is called from within the constructor to initialize the form.
@@ -91,10 +156,8 @@ public class MulticastChat extends javax.swing.JFrame {
     PanelChat = new javax.swing.JPanel();
     PanelLateral = new javax.swing.JPanel();
     LabelUsers = new javax.swing.JLabel();
-    LabelGroups = new javax.swing.JLabel();
     labelImg = new ImageLabel(PATH_IMG_LABEL);
-    panelGroups = new javax.swing.JPanel();
-    BtnGroup = new javax.swing.JButton();
+    BtnLogout = new javax.swing.JButton();
     userInfoComponent = new components.UserInfoComponent();
     scrollPaneFriends = new javax.swing.JScrollPane();
     paneFriends = new javax.swing.JPanel();
@@ -118,31 +181,24 @@ public class MulticastChat extends javax.swing.JFrame {
     LabelUsers.setForeground(new java.awt.Color(255, 255, 255));
     LabelUsers.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     LabelUsers.setText("En línea");
-    PanelLateral.add(LabelUsers, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 280, 70, -1));
-
-    LabelGroups.setFont(new java.awt.Font("Goudy Old Style", 1, 18)); // NOI18N
-    LabelGroups.setForeground(new java.awt.Color(255, 255, 255));
-    LabelGroups.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-    LabelGroups.setText("Grupos");
-    PanelLateral.add(LabelGroups, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 110, 60, -1));
+    PanelLateral.add(LabelUsers, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 110, 70, -1));
 
     labelImg.setPreferredSize(new java.awt.Dimension(250, 250));
     PanelLateral.add(labelImg, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 20, 180, 60));
 
-    panelGroups.setBackground(new java.awt.Color(229, 229, 229));
-    panelGroups.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+    BtnLogout.setBackground(new java.awt.Color(204, 0, 0));
+    BtnLogout.setFont(new java.awt.Font("Goudy Old Style", 0, 24)); // NOI18N
+    BtnLogout.setForeground(new java.awt.Color(255, 255, 255));
+    BtnLogout.setText("Cerrar Sesión");
+    BtnLogout.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        BtnLogoutActionPerformed(evt);
+      }
+    });
+    PanelLateral.add(BtnLogout, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 650, 160, -1));
 
-    BtnGroup.setBackground(new java.awt.Color(153, 0, 0));
-    BtnGroup.setFont(new java.awt.Font("Lucida Bright", 1, 12)); // NOI18N
-    BtnGroup.setForeground(new java.awt.Color(255, 255, 255));
-    BtnGroup.setText("Animatrónicos");
-    BtnGroup.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
-    panelGroups.add(BtnGroup, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 20, 160, -1));
-
-    PanelLateral.add(panelGroups, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 150, 180, 90));
-
-    userInfoComponent.setBackground(new java.awt.Color(204, 204, 204));
-    PanelLateral.add(userInfoComponent, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 590, 200, -1));
+    userInfoComponent.setBackground(new java.awt.Color(0, 0, 0));
+    PanelLateral.add(userInfoComponent, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 570, 200, 130));
 
     javax.swing.GroupLayout paneFriendsLayout = new javax.swing.GroupLayout(paneFriends);
     paneFriends.setLayout(paneFriendsLayout);
@@ -157,7 +213,7 @@ public class MulticastChat extends javax.swing.JFrame {
 
     scrollPaneFriends.setViewportView(paneFriends);
 
-    PanelLateral.add(scrollPaneFriends, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 310, 180, 250));
+    PanelLateral.add(scrollPaneFriends, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 140, 180, 250));
 
     PanelChat.add(PanelLateral, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 200, 700));
 
@@ -191,7 +247,7 @@ public class MulticastChat extends javax.swing.JFrame {
 
     PanelChat.add(welcomePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 0, 780, 50));
 
-    pane.setLayout(new javax.swing.BoxLayout(pane, javax.swing.BoxLayout.LINE_AXIS));
+    pane.setLayout(new javax.swing.BoxLayout(pane, javax.swing.BoxLayout.X_AXIS));
     ScrollPane.setViewportView(pane);
 
     PanelChat.add(ScrollPane, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 60, 760, 560));
@@ -220,10 +276,16 @@ public class MulticastChat extends javax.swing.JFrame {
     if(!textFieldMessage.equals("Escribe un mensaje...") && !textFieldMessage.equals("")) {
       String message = textFieldMessage.getText();
       Client.getInstanceClient().sendMessage(message);
-      addMessage(message, true);
+      addMessage(userModel.getUsername(), message, true);
       textFieldMessage.setText("");
     }
   }//GEN-LAST:event_textFieldMessageActionPerformed
+
+  private void BtnLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnLogoutActionPerformed
+    Client.getInstanceClient().disconnect();
+    this.setVisible(false);
+    Login.getInstanceLogin().setVisible(true);
+  }//GEN-LAST:event_BtnLogoutActionPerformed
 
   /**
    * @param args the command line arguments
@@ -261,9 +323,8 @@ public class MulticastChat extends javax.swing.JFrame {
   }
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JButton BtnGroup;
+  private javax.swing.JButton BtnLogout;
   private javax.swing.JPanel ContainerMessage;
-  private javax.swing.JLabel LabelGroups;
   private javax.swing.JLabel LabelUsers;
   private javax.swing.JPanel PanelChat;
   private javax.swing.JPanel PanelLateral;
@@ -271,7 +332,6 @@ public class MulticastChat extends javax.swing.JFrame {
   private javax.swing.JLabel labelImg;
   private javax.swing.JPanel pane;
   private javax.swing.JPanel paneFriends;
-  private javax.swing.JPanel panelGroups;
   private javax.swing.JScrollPane scrollPaneFriends;
   private javax.swing.JTextField textFieldMessage;
   private components.UserInfoComponent userInfoComponent;

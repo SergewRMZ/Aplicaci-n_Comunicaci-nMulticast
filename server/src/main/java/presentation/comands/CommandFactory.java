@@ -20,6 +20,8 @@ public class CommandFactory {
       case "getRooms" -> command = new GetChatRoomsCommand(data, chatRoomRepository);
       case "joinRoom" -> command = new JoinChatRoomCommand(data, chatRoomRepository);
       case "getUserGroups" -> command = new GetUserChatRoomsCommand(data, chatRoomRepository);
+      case "disconnect" -> command = new DisconnectUserCommand(data);
+      case "getUsersOnline" -> command = new GetUsersOnlineCommand(data);
       default -> throw new AssertionError();
     }
     

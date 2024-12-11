@@ -1,6 +1,8 @@
 package controller;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dto.ChatRoomDto;
@@ -8,6 +10,8 @@ import dto.ResponseDto;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import model.UserModel;
@@ -104,7 +108,7 @@ public class Client {
       System.out.println(response);
       JsonObject jsonResponse = JsonParser.parseString(response).getAsJsonObject();
       if (jsonResponse.has("status") && jsonResponse.get("status").getAsString().equals("success")) {
-        this.user = new UserModel(jsonResponse.get("id").getAsString(), jsonResponse.get("username").getAsString());
+        this.user = new UserModel(jsonResponse.get("id").getAsString(), jsonResponse.get("username").getAsString(), socketClient.getLocalPort());
         String message = jsonResponse.get("message").getAsString();
         return new ResponseDto(false, message, this.user);
       }
@@ -122,11 +126,31 @@ public class Client {
     return null;
   } // LoginUser
   
+  public void disconnect () {
+    try {
+      JsonObject request = new JsonObject();
+      request.addProperty("action", "disconnect");
+      request.addProperty("id", user.getUserId());
+      request.addProperty("username", user.getUsername());
+      request.addProperty("port", user.getPort());
+      sendRequest(request);
+      System.out.println("Cerrando sesión");
+      String response = getServerResponse();
+      System.out.println(response);
+      
+      if(threadPool != null) {
+        threadPool.shutdownNow();
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+  
   public void sendMessage(String message) {
     try {
       JsonObject jsonMessage = new JsonObject();
       jsonMessage.addProperty("action", "message");
-      jsonMessage.addProperty("user", this.user.getUsername());
+      jsonMessage.addProperty("username", this.user.getUsername());
       jsonMessage.addProperty("message", message);
       byte[] data = jsonMessage.toString().getBytes();
       DatagramPacket packet = new DatagramPacket(data, data.length, InetAddress.getByName(chatRoom.getAddress()), chatRoom.getPort());
@@ -193,6 +217,44 @@ public class Client {
     }
   }
   
+  public List<String> getUsersOnline() {
+    List<String> usersOnline = new ArrayList<>();
+    
+    try {
+      JsonObject request = new JsonObject();
+      request.addProperty("action", "getUsersOnline");
+      request.addProperty("idUser", user.getUserId());
+      sendRequest(request);
+      
+      String response = getServerResponse();
+      JsonObject responseJson = JsonParser.parseString(response).getAsJsonObject();
+      System.out.println(responseJson);
+      
+      if(responseJson.has("status")) {
+        String status = responseJson.get("status").getAsString();
+        
+        if(status.equals("success")) {
+          JsonArray usersJson = responseJson.getAsJsonArray("users");
+          for(JsonElement userElement: usersJson) {
+            JsonObject userJson = userElement.getAsJsonObject();
+            String username = userJson.get("username").getAsString();
+            usersOnline.add(username);
+          }
+        }
+        
+        else if(status.equals("not_found")) {
+          System.out.println("No hay usuarios activos");
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    
+    return usersOnline;
+  }
+  
+  
+  
   /**
    * Método para enviar una solicitud al servidor.
    * @param request Recibe un objecto de tipo JsonObject con la infromación necesaria.
@@ -219,6 +281,7 @@ public class Client {
     } catch (Exception e) {
       e.printStackTrace();
     }
-      return null;
+    
+    return null;
   }
 }

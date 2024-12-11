@@ -11,9 +11,9 @@ public class App {
   public static void main(String[] args) {
     SwingUtilities.invokeLater(() -> {
       try {
+        FlatLightLaf.setup();
+        UIManager.put("Button.arc", 100);
         UIManager.setLookAndFeel(new FlatLightLaf());
-        UIManager.put("Panel.arc", 100);
-        UIManager.put("Component.arc", 100);
         Login main = Login.getInstanceLogin();
         SwingUtilities.updateComponentTreeUI(main);
         main.setVisible(true);

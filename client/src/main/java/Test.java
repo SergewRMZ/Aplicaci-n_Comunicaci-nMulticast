@@ -8,7 +8,7 @@ public class Test {
    */
   public static void main (String args[]) {
     Client client = Client.getInstanceClient();
-    client.loginUser("Denia", "1234");
+    client.loginUser("Axel", "1234");
     client.getUserGroup();
     
     Scanner scanner = new Scanner(System.in);
