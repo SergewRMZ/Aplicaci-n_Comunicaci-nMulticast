@@ -23,7 +23,7 @@ public class TestClients {
       client.registerUser(username, password);
       
       client.loginUser(username, password);
-      client.joinChatRoom("Gamers");
+      client.getUserGroup();
     } catch (Exception e) {
       e.printStackTrace();
     }

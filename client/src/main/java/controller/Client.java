@@ -44,6 +44,7 @@ public class Client {
       socketClient.setTimeToLive(255);
       serverAddress = InetAddress.getByName(SERVER_HOST);
       CLIENT_PORT = socketClient.getLocalPort();
+      chatRoom = new ChatRoomDto("Grupo", "230.0.0.1", 8010);
       this.gson = new Gson();
       this.threadPool = Executors.newFixedThreadPool(MAX_CHATROOMS);
       System.out.println("Cliente unido al servidor " + SERVER_HOST);
@@ -159,62 +160,9 @@ public class Client {
     } catch (Exception e) {
     }
   }
-
-  public void getUserGroup () {
-    try {
-      JsonObject request = new JsonObject();
-      request.addProperty("action", "getUserGroups");
-      request.addProperty("idUser", user.getUserId());
-      sendRequest(request);
-      String response = getServerResponse();
-      JsonObject jsonResponse = gson.fromJson(response, JsonObject.class);
-      System.out.println(jsonResponse);
-      if (jsonResponse.has("status")) {
-        String status = jsonResponse.get("status").getAsString();
-        if (status.equals("success")) {
-          JsonObject groupJson = jsonResponse.getAsJsonObject("group");
-          this.chatRoom = gson.fromJson(groupJson, ChatRoomDto.class);
-          
-          // Inicio de hilo para escuchar en el grupo, dirección de grupo, puerto de grupo y puerto de usuario.
-          this.threadPool.submit(new MulticastListener(chatRoom.getAddress(), chatRoom.getPort(), this.CLIENT_PORT));
-        }
-        
-        else if(status.equals("not_found")) {
-          System.out.println("No te has unido al grupo");
-          // Preguntar si desea unirse a un grupo
-        }
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
   
-  public void joinChatRoom(String roomName) {
-    try {
-      JsonObject request = new JsonObject();
-      request.addProperty("action", "joinRoom");
-      request.addProperty("roomName", roomName);
-      request.addProperty("username", user.getUsername());
-      request.addProperty("id", user.getUserId());
-      sendRequest(request);
-      
-      String response = getServerResponse();
-      JsonObject jsonResponse = JsonParser.parseString(response).getAsJsonObject();
-      System.out.println(jsonResponse);
-      if(jsonResponse.has("status")) {
-        String status = jsonResponse.get("status").getAsString();
-        if("success".equals(status)) {
-          System.out.println("Cargando grupo...");
-          if(jsonResponse.has("groupAddress")) {
-            String groupAddress = jsonResponse.get("groupAddress").getAsString();
-            String multicastAddress = groupAddress.split(":")[0];
-            int port = Integer.parseInt(groupAddress.split(":")[1]);
-            this.threadPool.submit(new MulticastListener(multicastAddress, port, this.CLIENT_PORT));
-          }
-        } 
-      }
-    } catch (Exception e) {
-    }
+  public void getUserGroup() {
+    this.threadPool.submit(new MulticastListener(chatRoom.getAddress(), chatRoom.getPort(), this.CLIENT_PORT));
   }
   
   public List<String> getUsersOnline() {
@@ -252,8 +200,6 @@ public class Client {
     
     return usersOnline;
   }
-  
-  
   
   /**
    * Método para enviar una solicitud al servidor.

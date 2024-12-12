@@ -15,7 +15,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class SessionManager {
   private static SessionManager instance;
-  private Map<UserModel, List<ChatRoomDto>> activeSessions;
+  private Map<UserModel, ChatRoomDto> activeSessions;
   private final ReentrantLock lock = new ReentrantLock();
   private final String hostMulticast = "230.0.0.1";
   private final int portMulticast = 8010;
@@ -37,10 +37,10 @@ public class SessionManager {
    * @param userModel Modelo de negocio del Usuario
    * @param chatRooms Salas de chat
    */
-  public void addActiveUser(UserModel userModel, List<ChatRoomDto> chatRooms) {
+  public void addActiveUser(UserModel userModel, ChatRoomDto chatRoom) {
     lock.lock();
     try {
-      activeSessions.put(userModel, chatRooms);
+      activeSessions.put(userModel, chatRoom);
       sendActiveUserList();
       System.out.println("Usuario " + userModel.getUsername() + " conectado del puerto " + userModel.getPort());
     } finally {

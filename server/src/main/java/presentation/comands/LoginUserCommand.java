@@ -6,18 +6,15 @@ import domain.models.UserModel;
 import java.util.List;
 import presentation.SessionManager;
 import presentation.comands.Command;
-import repository.rooms.ChatRoomRepository;
 import repository.users.UserRepository;
 
 public class LoginUserCommand implements Command {
   private JsonObject response;
   private JsonObject data;
   private UserRepository UserRepository;
-  private ChatRoomRepository chatRoomRepository;
-  public LoginUserCommand (JsonObject data, UserRepository userRepository, ChatRoomRepository chatRoomRepository) {
+  public LoginUserCommand (JsonObject data, UserRepository userRepository) {
     this.data = data;
     this.UserRepository = userRepository;
-    this.chatRoomRepository = chatRoomRepository;
     this.response = new JsonObject();
   }
   
@@ -33,8 +30,8 @@ public class LoginUserCommand implements Command {
       
       // Agregar el usuario a la lista de conexiones y obtener sus grupos
       UserModel userModel = new UserModel(id, username, port);
-      List<ChatRoomDto> chatRooms = chatRoomRepository.getUserGroups(Integer.parseInt(id));
-      SessionManager.getInstance().addActiveUser(userModel, chatRooms);
+      ChatRoomDto chatRoom = new ChatRoomDto("Grupo", "230.0.0.1", 8010);
+      SessionManager.getInstance().addActiveUser(userModel, chatRoom);
       
       response.addProperty("status", "success");
       response.addProperty("id", id);
