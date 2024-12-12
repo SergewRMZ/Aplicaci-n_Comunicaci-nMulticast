@@ -6,12 +6,17 @@ import components.PlaceholderTextField;
 import controller.Client;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -23,13 +28,17 @@ public class MulticastChat extends javax.swing.JFrame {
   private UserModel userModel;
   private final String PATH_IMG_LABEL = "/logo.png";
   
+  private Map<String, JPanel> chats = new HashMap<>();
+  private boolean isMulticast = true;
   
   private MulticastChat() {
     initComponents();
     setLocationRelativeTo(null);
-    pane.setLayout(new BoxLayout(pane, BoxLayout.Y_AXIS));
+    pane.setLayout(new BoxLayout(pane, BoxLayout.Y_AXIS)); // Panel de grupo
     paneFriends.setLayout(new BoxLayout(paneFriends, BoxLayout.Y_AXIS));
     setUsersOnline();
+    
+    openChat("ChatGrupal");
   }
   
   /**
@@ -74,17 +83,55 @@ public class MulticastChat extends javax.swing.JFrame {
    * @param username Nombre del usuario en línea.
    */
   public void addUser(String username) {
-    JLabel userLabel = new JLabel(username);
-    userLabel.setFont(new Font("Lucida Sans", 0, 16));
-    userLabel.setForeground(AppColors.getWHITE_COLOR());
-    userLabel.setBackground(AppColors.getPRIMARY_COLOR());
-    userLabel.setOpaque(true);
-    userLabel.setBorder(BorderFactory.createEmptyBorder(2, 5, 2, 5));
-    userLabel.setAlignmentX(JComponent.CENTER_ALIGNMENT);
+    JButton userBtn = new JButton(username);
+    
+    // Se establece la fuente, alineamiento, tamaño y cursor.
+    userBtn.setFont(new Font("Lucida Sans", 0, 16));
+    userBtn.setOpaque(true);
+    userBtn.setAlignmentX(JComponent.CENTER_ALIGNMENT);
+    userBtn.setPreferredSize(new Dimension(paneFriends.getWidth(), 25));
+    userBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    
+    // Estableciendo el borde del botón
+    userBtn.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(AppColors.PRIMARY_COLOR, 2),
+            BorderFactory.createEmptyBorder(5, 10, 5, 10)
+    ));
+    
+    // Se agrega la acción
+    userBtn.addActionListener(e -> openChat(username));
+    
     paneFriends.add(Box.createVerticalStrut(5));
-    paneFriends.add(userLabel);
+    paneFriends.add(userBtn);
+    
     paneFriends.revalidate();
     paneFriends.repaint();
+  }
+  
+  private void openChat(String username) {
+    this.isMulticast = username.equals("ChatGrupal");
+    
+    if(chats.containsKey(username)) {
+      
+      JPanel chatPanel = chats.get(username);
+      ScrollPane.setViewportView(chatPanel);
+      this.pane = chatPanel;
+    }
+    
+    else {
+      JPanel chatPanel = new JPanel();
+      chatPanel.setLayout(new BoxLayout(chatPanel, BoxLayout.Y_AXIS));
+      
+      // Almacenar el chat
+      chats.put(username, chatPanel);
+      
+      // Mostrar el nuevo chat
+      ScrollPane.setViewportView(chatPanel);
+      this.pane = chatPanel;
+    }
+    
+    ScrollPane.revalidate();
+    ScrollPane.repaint();
   }
   
   /**
@@ -161,6 +208,7 @@ public class MulticastChat extends javax.swing.JFrame {
     userInfoComponent = new components.UserInfoComponent();
     scrollPaneFriends = new javax.swing.JScrollPane();
     paneFriends = new javax.swing.JPanel();
+    btnGroupChat = new javax.swing.JButton();
     ContainerMessage = new javax.swing.JPanel();
     textFieldMessage = new PlaceholderTextField("Escribe un mensaje...");
     welcomePanel = new javax.swing.JPanel();
@@ -214,6 +262,17 @@ public class MulticastChat extends javax.swing.JFrame {
     scrollPaneFriends.setViewportView(paneFriends);
 
     PanelLateral.add(scrollPaneFriends, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 140, 180, 250));
+
+    btnGroupChat.setBackground(new java.awt.Color(51, 153, 255));
+    btnGroupChat.setFont(new java.awt.Font("JetBrains Mono", 0, 18)); // NOI18N
+    btnGroupChat.setForeground(new java.awt.Color(255, 255, 255));
+    btnGroupChat.setText("Grupo");
+    btnGroupChat.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        btnGroupChatActionPerformed(evt);
+      }
+    });
+    PanelLateral.add(btnGroupChat, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 400, 180, 30));
 
     PanelChat.add(PanelLateral, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 200, 700));
 
@@ -287,6 +346,10 @@ public class MulticastChat extends javax.swing.JFrame {
     Login.getInstanceLogin().setVisible(true);
   }//GEN-LAST:event_BtnLogoutActionPerformed
 
+  private void btnGroupChatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGroupChatActionPerformed
+    openChat("ChatGrupal");
+  }//GEN-LAST:event_btnGroupChatActionPerformed
+
   /**
    * @param args the command line arguments
    */
@@ -329,6 +392,7 @@ public class MulticastChat extends javax.swing.JFrame {
   private javax.swing.JPanel PanelChat;
   private javax.swing.JPanel PanelLateral;
   private javax.swing.JScrollPane ScrollPane;
+  private javax.swing.JButton btnGroupChat;
   private javax.swing.JLabel labelImg;
   private javax.swing.JPanel pane;
   private javax.swing.JPanel paneFriends;

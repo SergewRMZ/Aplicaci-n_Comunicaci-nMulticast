@@ -13,6 +13,7 @@ views\Register$3.class
 TestClients.class
 utils\ImageLoader.class
 views\Register.class
+views\MulticastChat$4.class
 dto\ChatRoomDto.class
 components\MessageComponent.class
 views\Register$2.class
