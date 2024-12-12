@@ -159,7 +159,7 @@ public class Client {
     } catch (Exception e) {
     }
   }
-  
+
   public void getUserGroup () {
     try {
       JsonObject request = new JsonObject();

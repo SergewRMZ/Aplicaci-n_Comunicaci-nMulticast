@@ -1,14 +1,11 @@
 package views;
 
-import com.formdev.flatlaf.util.UIScale;
 import components.ImageLabel;
 import components.PlaceholderTextField;
 import controller.Client;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.util.HashMap;
 import java.util.List;
@@ -173,7 +170,6 @@ public class MulticastChat extends javax.swing.JFrame {
         messageLabel.setBackground(AppColors.getPRIMARY_COLOR());
     } else {
         messageLabel.setBackground(AppColors.getSECONDARY_COLOR());
-        
     }
     
     messagePanel.setOpaque(true);
@@ -334,7 +330,15 @@ public class MulticastChat extends javax.swing.JFrame {
   private void textFieldMessageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textFieldMessageActionPerformed
     if(!textFieldMessage.equals("Escribe un mensaje...") && !textFieldMessage.equals("")) {
       String message = textFieldMessage.getText();
-      Client.getInstanceClient().sendMessage(message);
+      
+      if(this.isMulticast) {
+        Client.getInstanceClient().sendMessage(message);
+      }
+      
+      else {
+        // Obtener los datos del usuario destino
+        // Enviar mensaje privado
+      }
       addMessage(userModel.getUsername(), message, true);
       textFieldMessage.setText("");
     }
