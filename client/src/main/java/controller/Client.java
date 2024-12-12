@@ -11,6 +11,7 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -26,9 +27,13 @@ public class Client {
   private final String SERVER_HOST = "127.0.0.1";
   private MulticastSocket socketClient;
   private InetAddress serverAddress;
+  String ipAddress;
   
   // Datos del Usuario
   private UserModel user;
+  
+  // Lista de amigos o usuarios en linea
+  private HashMap<String, UserModel> usersOnline = new HashMap<String, UserModel>();
   
   // ALBERCA DE HILOS
   private ExecutorService threadPool;
@@ -43,11 +48,13 @@ public class Client {
       socketClient.setLoopbackMode(false);
       socketClient.setTimeToLive(255);
       serverAddress = InetAddress.getByName(SERVER_HOST);
+      ipAddress = InetAddress.getLocalHost().getHostAddress();
       CLIENT_PORT = socketClient.getLocalPort();
       chatRoom = new ChatRoomDto("Grupo", "230.0.0.1", 8010);
       this.gson = new Gson();
       this.threadPool = Executors.newFixedThreadPool(MAX_CHATROOMS);
       System.out.println("Cliente unido al servidor " + SERVER_HOST);
+      System.out.println("Dirección local " + ipAddress);
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -103,13 +110,14 @@ public class Client {
       user.addProperty("password", password);
       data.add("user", user);
       data.addProperty("port", socketClient.getLocalPort());
+      data.addProperty("ipAddress", ipAddress);
       
       sendRequest(data);
       String response = getServerResponse();
       System.out.println(response);
       JsonObject jsonResponse = JsonParser.parseString(response).getAsJsonObject();
       if (jsonResponse.has("status") && jsonResponse.get("status").getAsString().equals("success")) {
-        this.user = new UserModel(jsonResponse.get("id").getAsString(), jsonResponse.get("username").getAsString(), socketClient.getLocalPort());
+        this.user = new UserModel(jsonResponse.get("id").getAsString(), jsonResponse.get("username").getAsString(), socketClient.getLocalPort(), ipAddress);
         String message = jsonResponse.get("message").getAsString();
         return new ResponseDto(false, message, this.user);
       }
@@ -132,8 +140,7 @@ public class Client {
       JsonObject request = new JsonObject();
       request.addProperty("action", "disconnect");
       request.addProperty("id", user.getUserId());
-      request.addProperty("username", user.getUsername());
-      request.addProperty("port", user.getPort());
+      
       sendRequest(request);
       System.out.println("Cerrando sesión");
       String response = getServerResponse();
@@ -186,6 +193,10 @@ public class Client {
           for(JsonElement userElement: usersJson) {
             JsonObject userJson = userElement.getAsJsonObject();
             String username = userJson.get("username").getAsString();
+            int port = userJson.get("port").getAsInt();
+            String ipAddress = userJson.get("ipAddress").getAsString();
+            
+            addUserOnlineList(username, port, ipAddress);
             usersOnline.add(username);
           }
         }
@@ -199,6 +210,11 @@ public class Client {
     }
     
     return usersOnline;
+  }
+  
+  private void addUserOnlineList(String username, int port, String ipAddress) {
+    UserModel userModel = new UserModel(username, port, ipAddress);
+    usersOnline.put(username, userModel);
   }
   
   /**

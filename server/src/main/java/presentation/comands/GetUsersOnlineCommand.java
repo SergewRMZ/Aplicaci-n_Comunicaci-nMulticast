@@ -20,18 +20,11 @@ public class GetUsersOnlineCommand implements Command {
       String idUser = request.get("idUser").getAsString();
       
       
-      List<String> users = SessionManager.getInstance().getActiveUserList();
+      JsonArray activeUsers = SessionManager.getInstance().getActiveUsers();
       
-      if(users != null) {
-        JsonArray userArray = new JsonArray();
-        for(String user: users) {
-          JsonObject userJson = new JsonObject();
-          userJson.addProperty("username", user);
-          userArray.add(userJson);
-        }
-        
+      if(activeUsers != null) {
         response.addProperty("status", "success");
-        response.add("users", userArray);
+        response.add("users", activeUsers);
         response.addProperty("message", "Lista de usuarios obtenida con éxito");
       }
       

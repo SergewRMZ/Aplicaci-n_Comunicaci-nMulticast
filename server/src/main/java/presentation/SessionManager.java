@@ -42,7 +42,7 @@ public class SessionManager {
     try {
       activeSessions.put(userModel, chatRoom);
       sendActiveUserList();
-      System.out.println("Usuario " + userModel.getUsername() + " conectado del puerto " + userModel.getPort());
+      showUsers();
     } finally {
       lock.unlock();
     }
@@ -53,32 +53,40 @@ public class SessionManager {
    * cuando un usuario decide cerrar la sesión.
    * @param userModel 
    */
-  public void removeActiveUser(UserModel userModel) {
+  public void removeActiveUser(String userId) {
     lock.lock();
     try {
-      activeSessions.remove(userModel);
+      UserModel userToRemove = null;
+      
+      for(UserModel user: activeSessions.keySet()) {
+        if(user.getUserId().equals(userId)) {
+          userToRemove = user;
+          System.out.println("Usuario encontrado");
+          break;
+        }
+      }
+      
+      activeSessions.remove(userToRemove);
       sendActiveUserList();
-      System.out.println("Usuario " + userModel.getUsername() + " deconectado");
+      showUsers();
     } finally {
       lock.unlock();
     }
   }
   
-  /**
-   * Método para obtener todos los usuarios que están activos.
-   * @return Una lista de usuarios si es que existe un usuario en sesión.
-   */
-  public List<String> getActiveUserList() {
-    if(!activeSessions.isEmpty()) {
-      List<String> users = new ArrayList<>();
-      for(UserModel userModel : activeSessions.keySet()) {
-        users.add(userModel.getUsername());
-      }
+  public JsonArray getActiveUsers () {
+    JsonArray activeUsers = new JsonArray();
+    for(UserModel user : activeSessions.keySet()) {
+      JsonObject userObject = new JsonObject();
+      userObject.addProperty("username", user.getUsername());
+      userObject.addProperty("port", user.getPort());
+      userObject.addProperty("ipAddress", user.getIpAddress());
       
-      return users;
+      // Agregar el objecto de usuario
+      activeUsers.add(userObject);
     }
     
-    return null;
+    return activeUsers;
   }
   
   /**
@@ -89,17 +97,9 @@ public class SessionManager {
     JsonObject activeUsersList = new JsonObject();
     activeUsersList.addProperty("action", "users-list");
     activeUsersList.addProperty("status", "success");
-    JsonArray usersArray = new JsonArray();
-    for(UserModel user : activeSessions.keySet()) {
-      JsonObject userObject = new JsonObject();
-      userObject.addProperty("username", user.getUsername());
-      userObject.addProperty("port", user.getPort());
-      
-      // Agregar el objecto de usuario
-      usersArray.add(userObject);
-    }
+    JsonArray activeUsers = getActiveUsers();
     
-    activeUsersList.add("users", usersArray);
+    activeUsersList.add("users", activeUsers);
     
     try {
       InetAddress multicastAddress = InetAddress.getByName(hostMulticast);
@@ -107,6 +107,13 @@ public class SessionManager {
       ms.sendMessage(activeUsersList, multicastAddress, portMulticast);
     } catch (Exception e) {
       e.printStackTrace();
+    }
+  }
+  
+  private void showUsers() {
+    System.out.println("Usuarios conectados: ");
+    for(UserModel user : activeSessions.keySet()) {
+      System.out.println(user.getUsername());
     }
   }
 }
