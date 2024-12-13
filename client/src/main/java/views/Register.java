@@ -1,5 +1,5 @@
 package views;
-import controller.Client;
+import network.Client;
 import components.ImageLabel;
 import components.PlaceholderPasswordField;
 import components.PlaceholderTextField;

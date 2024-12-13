@@ -1,6 +1,5 @@
-package controller;
+package network;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -11,7 +10,6 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -21,7 +19,6 @@ import threads.MulticastListener;
 public class Client {
   // Información sobre la conexión al servidor.
   private static Client instance;
-  private Gson gson;
   private int port = 8000;
   private int CLIENT_PORT;
   private final String SERVER_HOST = "127.0.0.1";
@@ -31,9 +28,9 @@ public class Client {
   
   // Datos del Usuario
   private UserModel user;
-  
-  // Lista de amigos o usuarios en linea
-  private HashMap<String, UserModel> usersOnline = new HashMap<String, UserModel>();
+ 
+  // Gestor de Usuarios conectados
+  UsersManager usersManager;
   
   // ALBERCA DE HILOS
   private ExecutorService threadPool;
@@ -49,9 +46,16 @@ public class Client {
       socketClient.setTimeToLive(255);
       serverAddress = InetAddress.getByName(SERVER_HOST);
       ipAddress = InetAddress.getLocalHost().getHostAddress();
+      
       CLIENT_PORT = socketClient.getLocalPort();
+      
+      // Datos Multicast
       chatRoom = new ChatRoomDto("Grupo", "230.0.0.1", 8010);
-      this.gson = new Gson();
+      
+      // Gestor de usuarios
+      usersManager = UsersManager.getInstance();
+      
+      // Alberca de hilos
       this.threadPool = Executors.newFixedThreadPool(MAX_CHATROOMS);
       System.out.println("Cliente unido al servidor " + SERVER_HOST);
       System.out.println("Dirección local " + ipAddress);
@@ -98,8 +102,8 @@ public class Client {
       e.printStackTrace();
     }
     
-    return null; // Si no hay respuesta devuelve null
-  } // RegisterUser
+    return null; 
+  }
   
   public ResponseDto loginUser (String username, String password) {
     try {
@@ -114,7 +118,6 @@ public class Client {
       
       sendRequest(data);
       String response = getServerResponse();
-      System.out.println(response);
       JsonObject jsonResponse = JsonParser.parseString(response).getAsJsonObject();
       if (jsonResponse.has("status") && jsonResponse.get("status").getAsString().equals("success")) {
         this.user = new UserModel(jsonResponse.get("id").getAsString(), jsonResponse.get("username").getAsString(), socketClient.getLocalPort(), ipAddress);
@@ -154,6 +157,11 @@ public class Client {
     }
   }
   
+  /**
+   * Método para el envio de mensajes multicast, los datos del grupo
+   * están almacenados en el objecto ChatRoom que contiene la dirección multicast y puerto.
+   * @param message Mensaje que se enviará al grupo multicast.
+   */
   public void sendMessage(String message) {
     try {
       JsonObject jsonMessage = new JsonObject();
@@ -165,6 +173,39 @@ public class Client {
       socketClient.send(packet);
       System.out.println("Mensaje enviado al grupo multicast");
     } catch (Exception e) {
+    }
+  }
+  
+  /**
+   * Método para el envio de mensajes privados. Recibe el nombre del usuario
+   * y con base en este se obtiene sus datos sobre su dirección ip y puerto específico
+   * para enviar el mensaje.
+   * @param message Mensaje a enviar
+   * @param recipient Usuario destinatario.
+   */
+  public void sendMessagePrivate (String message, String recipient) {
+    UserModel userDest = usersManager.getModelByUsername(recipient);
+    try {
+      JsonObject jsonMessage = new JsonObject();
+      jsonMessage.addProperty("action", "message-private");
+      jsonMessage.addProperty("sender", user.getUsername());
+      jsonMessage.addProperty("recipient", recipient);
+      jsonMessage.addProperty("message", message);
+
+      byte[] data = jsonMessage.toString().getBytes();
+      InetAddress ipAddressDest = InetAddress.getByName(userDest.getIpAddress());
+      DatagramPacket packet = new DatagramPacket(
+              data, 
+              data.length, 
+              ipAddressDest, 
+              userDest.getPort()
+      );
+
+      socketClient.send(packet);
+      System.out.println("Mensaje enviado a " + recipient);
+    } catch (Exception e) {
+      System.err.println("Error al enviar el mensaje privado");
+      e.printStackTrace();
     }
   }
   
@@ -196,7 +237,10 @@ public class Client {
             int port = userJson.get("port").getAsInt();
             String ipAddress = userJson.get("ipAddress").getAsString();
             
-            addUserOnlineList(username, port, ipAddress);
+            // Agregar a la lista de usuarios conectados
+            UserModel userModel = new UserModel(username, port, ipAddress);
+            usersManager.addUserOnline(username, userModel);
+            
             usersOnline.add(username);
           }
         }
@@ -210,11 +254,6 @@ public class Client {
     }
     
     return usersOnline;
-  }
-  
-  private void addUserOnlineList(String username, int port, String ipAddress) {
-    UserModel userModel = new UserModel(username, port, ipAddress);
-    usersOnline.put(username, userModel);
   }
   
   /**

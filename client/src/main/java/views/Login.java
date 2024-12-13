@@ -1,6 +1,6 @@
 package views;
 import components.ImageLabel;
-import controller.Client;
+import network.Client;
 import components.PlaceholderPasswordField;
 import components.PlaceholderTextField;
 import dto.ResponseDto;
@@ -173,7 +173,7 @@ public class Login extends javax.swing.JFrame {
       return;
     }
     
-    // Enviar datos al servidor
+    // Enviar datos al servidor e iniciar sesión
     Client client = Client.getInstanceClient();
     ResponseDto response = client.loginUser(username, password);
     

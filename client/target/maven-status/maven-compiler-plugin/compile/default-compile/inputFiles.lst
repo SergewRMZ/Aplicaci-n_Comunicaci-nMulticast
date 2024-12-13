@@ -15,7 +15,8 @@ C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\sr
 C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\dto\ResponseDto.java
 C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\components\PlaceholderPasswordField.java
 C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\components\MessageComponent.java
-C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\controller\Client.java
+C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\network\Client.java
+C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\network\UsersManager.java
 C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\Test.java
 C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\threads\MulticastListener.java
 C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\components\ImageLabel.java

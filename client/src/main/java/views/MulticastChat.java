@@ -2,7 +2,7 @@ package views;
 
 import components.ImageLabel;
 import components.PlaceholderTextField;
-import controller.Client;
+import network.Client;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -27,6 +27,8 @@ public class MulticastChat extends javax.swing.JFrame {
   
   private Map<String, JPanel> chats = new HashMap<>();
   private boolean isMulticast = true;
+  private String selectedUser = null;
+  
   
   private MulticastChat() {
     initComponents();
@@ -34,7 +36,6 @@ public class MulticastChat extends javax.swing.JFrame {
     pane.setLayout(new BoxLayout(pane, BoxLayout.Y_AXIS)); // Panel de grupo
     paneFriends.setLayout(new BoxLayout(paneFriends, BoxLayout.Y_AXIS));
     setUsersOnline();
-    
     openChat("ChatGrupal");
   }
   
@@ -75,6 +76,22 @@ public class MulticastChat extends javax.swing.JFrame {
     this.userInfoComponent.setUsernameLabel(userModel.getUsername());
   }
   
+  public void removeUser(String username) {
+    for(int i = 0; i < paneFriends.getComponentCount(); i++) {
+      JComponent component = (JComponent) paneFriends.getComponent(i);
+      if(component instanceof JButton) {
+        JButton userBtn = (JButton) component;
+        if(userBtn.getText().equals(username)) {
+          paneFriends.remove(i);
+          break;
+        }
+      }
+    }
+    
+    paneFriends.revalidate();
+    paneFriends.repaint();
+  }
+  
   /**
    * Método se llama para agregar un nuevo usuario en la lista de usuarios conectados de la interfaz
    * @param username Nombre del usuario en línea.
@@ -107,6 +124,7 @@ public class MulticastChat extends javax.swing.JFrame {
   
   private void openChat(String username) {
     this.isMulticast = username.equals("ChatGrupal");
+    selectedUser = username;
     
     if(chats.containsKey(username)) {
       
@@ -329,16 +347,16 @@ public class MulticastChat extends javax.swing.JFrame {
 
   private void textFieldMessageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textFieldMessageActionPerformed
     if(!textFieldMessage.equals("Escribe un mensaje...") && !textFieldMessage.equals("")) {
+      Client client = Client.getInstanceClient();
       String message = textFieldMessage.getText();
-      
       if(this.isMulticast) {
-        Client.getInstanceClient().sendMessage(message);
+        client.sendMessage(message);
       }
       
       else {
-        // Obtener los datos del usuario destino
-        // Enviar mensaje privado
+        client.sendMessagePrivate(message, selectedUser);
       }
+      
       addMessage(userModel.getUsername(), message, true);
       textFieldMessage.setText("");
     }

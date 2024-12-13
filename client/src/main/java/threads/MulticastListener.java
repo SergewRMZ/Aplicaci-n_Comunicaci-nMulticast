@@ -7,6 +7,8 @@ import com.google.gson.JsonParser;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import model.UserModel;
+import network.UsersManager;
 import views.MulticastChat;
 
 public class MulticastListener implements Runnable {
@@ -52,14 +54,17 @@ public class MulticastListener implements Runnable {
         
         System.out.println("Mensaje recibido: " + new String(packet.getData(), 0, packet.getLength()));
         String message = new String(packet.getData(), 0, packet.getLength());
-        JsonObject messageJson = JsonParser.parseString(message).getAsJsonObject();
+        JsonObject json = JsonParser.parseString(message).getAsJsonObject();
         
-        if(messageJson.has("action") && messageJson.get("action").getAsString().equals("users-list")) {
-          handleNotifyUserConnected(messageJson);
-        }
-        
-        else if(messageJson.has("action") && messageJson.get("action").getAsString().equals("message")) {
-          handleMessageMulticast(messageJson);
+        if(json.has("action")) {
+          String action = json.get("action").getAsString();
+          
+          switch (action) {
+            case "user-connected" -> handleNotifyUserConnected(json);
+            case "user-disconnected" -> handleNotifyUserDisconnected(json);
+            case "message" -> handleMessageMulticast(json);
+            default -> throw new AssertionError();
+          }
         }
       }
     } catch (Exception e) {
@@ -80,19 +85,36 @@ public class MulticastListener implements Runnable {
     }
   }
   
-  private void handleNotifyUserConnected(JsonObject messageJson) {
-    JsonArray users = messageJson.getAsJsonArray("users");
-    for(JsonElement user : users) {
-      JsonObject userJson = user.getAsJsonObject();
-      String username = userJson.get("username").getAsString();
-      int port = userJson.get("port").getAsInt();
-      MulticastChat.getInstance().addUser(username);
-    }
+  private void handleNotifyUserConnected(JsonObject json) {
+    UsersManager usersManager = UsersManager.getInstance(); 
+    
+    JsonObject user = json.getAsJsonObject("user");
+    String username = user.get("username").getAsString();
+    int port = user.get("port").getAsInt();
+    String ipAddress = user.get("ipAddress").getAsString();
+    
+    // Agregar a lista de usuarios conectados.
+    UserModel userModel = new UserModel(username, port, ipAddress);
+    usersManager.addUserOnline(username, userModel);
+    
+    // Agregar usuario a la interfaz
+    MulticastChat.getInstance().addUser(username);
   }
   
-  private void handleMessageMulticast(JsonObject messageJson) {
-    String username = messageJson.get("username").getAsString();
-    String message = messageJson.get("message").getAsString(); // Obtener el mensaje
+  private void handleNotifyUserDisconnected(JsonObject json) {
+    UsersManager usersManager = UsersManager.getInstance(); 
+    
+    JsonObject user = json.getAsJsonObject("user");
+    String username = user.get("username").getAsString();
+    usersManager.removeUser(username);
+    
+    // Agregar usuario a la interfaz
+    MulticastChat.getInstance().removeUser(username);
+  }
+  
+  private void handleMessageMulticast(JsonObject json) {
+    String username = json.get("username").getAsString();
+    String message = json.get("message").getAsString(); // Obtener el mensaje
     MulticastChat.getInstance().addMessage(username, message, false);
   }
 }

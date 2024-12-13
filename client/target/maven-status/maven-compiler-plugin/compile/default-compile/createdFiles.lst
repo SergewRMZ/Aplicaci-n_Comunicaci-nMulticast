@@ -1,3 +1,4 @@
+network\Client.class
 components\EmojiComponent.class
 views\Login$2.class
 App.class
@@ -30,8 +31,8 @@ views\Login$3.class
 threads\MulticastListener.class
 dto\ResponseDto.class
 views\Register$4.class
+network\UsersManager.class
 views\Login$4.class
 views\MulticastChat.class
-controller\Client.class
 views\Login$1.class
 components\PlaceholderTextField$1.class

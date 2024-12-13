@@ -7,8 +7,6 @@ import domain.dto.ChatRoomDto;
 import domain.models.UserModel;
 
 import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
@@ -35,14 +33,13 @@ public class SessionManager {
    * Método para agregar un usuario a la lista de conexiones, además 
    * de agregar los grupos a los que pertenece el usuario.
    * @param userModel Modelo de negocio del Usuario
-   * @param chatRooms Salas de chat
+   * @param chatRoom Sala de chat
    */
   public void addActiveUser(UserModel userModel, ChatRoomDto chatRoom) {
     lock.lock();
     try {
       activeSessions.put(userModel, chatRoom);
-      sendActiveUserList();
-      showUsers();
+      sendNewUserNotification(userModel);
     } finally {
       lock.unlock();
     }
@@ -51,7 +48,7 @@ public class SessionManager {
   /**
    * Método para eliminar un usuario de la lista de usuarios activos. Se ejecuta
    * cuando un usuario decide cerrar la sesión.
-   * @param userModel 
+   * @param userId 
    */
   public void removeActiveUser(String userId) {
     lock.lock();
@@ -67,8 +64,7 @@ public class SessionManager {
       }
       
       activeSessions.remove(userToRemove);
-      sendActiveUserList();
-      showUsers();
+      sendUserDisconnectedNotification(userToRemove);
     } finally {
       lock.unlock();
     }
@@ -91,24 +87,56 @@ public class SessionManager {
   
   /**
    * Este método se invoca siempre que un usuario inicia sesión. Al iniciar sesión, 
-   * el servidor envia la lista de usuarios conectados actualizada.
+   * el servidor envia a todos los usuarios la notificación de que un usuario está en linea.
    */
-  private void sendActiveUserList() {
-    JsonObject activeUsersList = new JsonObject();
-    activeUsersList.addProperty("action", "users-list");
-    activeUsersList.addProperty("status", "success");
-    JsonArray activeUsers = getActiveUsers();
+  private void sendNewUserNotification(UserModel user) {
+    JsonObject newUserNotification = new JsonObject();
+    newUserNotification.addProperty("action", "user-connected");
+    newUserNotification.addProperty("status", "success");
     
-    activeUsersList.add("users", activeUsers);
-    
+    JsonObject userObject = new JsonObject();
+    userObject.addProperty("username", user.getUsername());
+    userObject.addProperty("port", user.getPort());
+    userObject.addProperty("ipAddress", user.getIpAddress());   
+
+    newUserNotification.add("user", userObject);
+
     try {
       InetAddress multicastAddress = InetAddress.getByName(hostMulticast);
       MulticastSender ms = MulticastSender.getInstance();
-      ms.sendMessage(activeUsersList, multicastAddress, portMulticast);
+      ms.sendMessage(newUserNotification, multicastAddress, portMulticast);
     } catch (Exception e) {
       e.printStackTrace();
     }
   }
+
+  /**
+   * Método que se invoca cuando un usuario se desconecta del grupo multicast. Se envia notificación a todos
+   * los usuarios del grupo.
+   * @param user
+   */
+
+  private void sendUserDisconnectedNotification(UserModel user) {
+    JsonObject disconnectNotification = new JsonObject();
+    disconnectNotification.addProperty("action", "user-disconnected");
+    disconnectNotification.addProperty("status", "success");
+    
+    JsonObject userObject = new JsonObject();
+    userObject.addProperty("username", user.getUsername());
+    userObject.addProperty("port", user.getPort());
+    userObject.addProperty("ipAddress", user.getIpAddress());
+    
+    disconnectNotification.add("user", userObject);
+    
+    try {
+        InetAddress multicastAddress = InetAddress.getByName(hostMulticast);
+        MulticastSender ms = MulticastSender.getInstance();
+        ms.sendMessage(disconnectNotification, multicastAddress, portMulticast);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+  }
+
   
   private void showUsers() {
     System.out.println("Usuarios conectados: ");
