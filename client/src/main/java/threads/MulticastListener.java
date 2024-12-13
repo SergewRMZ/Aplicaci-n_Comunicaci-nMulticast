@@ -14,17 +14,14 @@ import views.MulticastChat;
 public class MulticastListener implements Runnable {
   private final String multicastAddress;
   private final int port;
-  private final int clientPort;
   private MulticastSocket socket;
   
-  public MulticastListener(String multicastAddress, int port, int clientPort) {
+  public MulticastListener(String multicastAddress, int port) {
     this.multicastAddress = multicastAddress;
     this.port = port;
-    this.clientPort = clientPort;
     
     System.out.println("Multicast Address: " + multicastAddress);
     System.out.println("Puerto multicast: " + port);
-    System.out.println("Puerto de cliente: " + clientPort);
   }
   
   public MulticastSocket getSocket() {
@@ -35,6 +32,7 @@ public class MulticastListener implements Runnable {
   public void run() {
     try (MulticastSocket socket = new MulticastSocket(port)){
       this.socket = socket;
+      this.socket.setLoopbackMode(true);
       
       InetAddress group = InetAddress.getByName(multicastAddress);
       socket.joinGroup(group);
@@ -43,14 +41,7 @@ public class MulticastListener implements Runnable {
       byte[] buffer = new byte[1024];
       while(true) {
         DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-        socket.receive(packet);
-        
-        int senderPort = packet.getPort();
-        
-        // Verificar que el paquete no sea uno enviado por el mismo usuario.
-        if(senderPort == this.clientPort) {
-          continue;
-        }
+        socket.receive(packet);        
         
         System.out.println("Mensaje recibido: " + new String(packet.getData(), 0, packet.getLength()));
         String message = new String(packet.getData(), 0, packet.getLength());

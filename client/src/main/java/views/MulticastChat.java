@@ -36,6 +36,7 @@ public class MulticastChat extends javax.swing.JFrame {
     pane.setLayout(new BoxLayout(pane, BoxLayout.Y_AXIS)); // Panel de grupo
     paneFriends.setLayout(new BoxLayout(paneFriends, BoxLayout.Y_AXIS));
     setUsersOnline();
+    Client.getInstanceClient().listenUnicast();
     openChat("ChatGrupal");
   }
   

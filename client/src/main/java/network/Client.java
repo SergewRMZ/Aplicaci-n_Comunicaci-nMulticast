@@ -15,12 +15,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import model.UserModel;
 import threads.MulticastListener;
+import threads.UnicastListener;
 
 public class Client {
   // Información sobre la conexión al servidor.
   private static Client instance;
   private int port = 8000;
-  private int CLIENT_PORT;
   private final String SERVER_HOST = "127.0.0.1";
   private MulticastSocket socketClient;
   private InetAddress serverAddress;
@@ -40,28 +40,11 @@ public class Client {
   private ChatRoomDto chatRoom;
   
   private Client() {
-    try {
-      socketClient = new MulticastSocket();
-      socketClient.setLoopbackMode(false);
-      socketClient.setTimeToLive(255);
-      serverAddress = InetAddress.getByName(SERVER_HOST);
-      ipAddress = InetAddress.getLocalHost().getHostAddress();
-      
-      CLIENT_PORT = socketClient.getLocalPort();
-      
-      // Datos Multicast
-      chatRoom = new ChatRoomDto("Grupo", "230.0.0.1", 8010);
-      
-      // Gestor de usuarios
-      usersManager = UsersManager.getInstance();
-      
-      // Alberca de hilos
-      this.threadPool = Executors.newFixedThreadPool(MAX_CHATROOMS);
-      System.out.println("Cliente unido al servidor " + SERVER_HOST);
-      System.out.println("Dirección local " + ipAddress);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    initializeSocket();
+    initializeChatRoom();
+    initializeManagers();
+    System.out.println("Cliente unido al servidor " + SERVER_HOST);
+    System.out.println("Dirección local " + ipAddress);
   }
   
   public static Client getInstanceClient() {
@@ -71,11 +54,32 @@ public class Client {
     return instance;
   }
   
+  private void initializeSocket() {
+    try {
+      socketClient = new MulticastSocket();
+      socketClient.setLoopbackMode(false);
+      socketClient.setTimeToLive(255);
+      serverAddress = InetAddress.getByName(SERVER_HOST);
+      ipAddress = InetAddress.getLocalHost().getHostAddress();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+  
+  private void initializeChatRoom() {
+    chatRoom = new ChatRoomDto("Grupo", "230.0.0.1", 8010);
+  }
+  
+  private void initializeManagers() {
+    usersManager = UsersManager.getInstance();
+    this.threadPool = Executors.newFixedThreadPool(MAX_CHATROOMS);
+  }
+  
   public UserModel getUser() {
     return this.user;
   }
   
-  public String registerUser(String username, String password) {
+  public ResponseDto registerUser(String username, String password) {
     try {
       JsonObject data = new JsonObject();
       data.addProperty("action", "register");
@@ -91,12 +95,12 @@ public class Client {
       
       if (jsonResponse.has("status") && jsonResponse.get("status").getAsString().equals("success")) {
         String message = jsonResponse.get("message").getAsString();
-        return message;
+        return new ResponseDto(false, message, null);
       }
       
       else {
         String message = jsonResponse.get("message").getAsString();
-        return message;
+        return new ResponseDto(true, message, null);
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -148,6 +152,10 @@ public class Client {
       System.out.println("Cerrando sesión");
       String response = getServerResponse();
       System.out.println(response);
+      
+      if(socketClient != null && !socketClient.isClosed()) {
+        socketClient.close();
+      }
       
       if(threadPool != null) {
         threadPool.shutdownNow();
@@ -210,7 +218,11 @@ public class Client {
   }
   
   public void getUserGroup() {
-    this.threadPool.submit(new MulticastListener(chatRoom.getAddress(), chatRoom.getPort(), this.CLIENT_PORT));
+    this.threadPool.submit(new MulticastListener(chatRoom.getAddress(), chatRoom.getPort()));
+  }
+  
+  public void listenUnicast() {
+    this.threadPool.submit(new UnicastListener(socketClient));
   }
   
   public List<String> getUsersOnline() {

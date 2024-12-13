@@ -16,10 +16,13 @@ public class Test {
       String message = scanner.nextLine();
       if(message.equalsIgnoreCase("exit")) {
         System.out.println("Saliendo...");
+        client.disconnect();
         break;
       }
+      
       client.sendMessage(message);
     }
+    System.out.println("Programa terminado");
     scanner.close();
   }
 }

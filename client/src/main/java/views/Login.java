@@ -185,6 +185,7 @@ public class Login extends javax.swing.JFrame {
         JOptionPane.showMessageDialog(this, response.getMessage(), "Success", JOptionPane.INFORMATION_MESSAGE);
         setVisible(false);
         client.getUserGroup();
+        System.out.println("Hilos iniciados");
         UserModel userModel = (UserModel) response.getObject();
         MulticastChat.getInstance().setUserModel(userModel);
         MulticastChat.getInstance().setVisible(true);

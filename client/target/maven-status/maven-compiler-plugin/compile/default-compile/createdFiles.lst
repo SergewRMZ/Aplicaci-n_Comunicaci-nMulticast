@@ -33,6 +33,7 @@ dto\ResponseDto.class
 views\Register$4.class
 network\UsersManager.class
 views\Login$4.class
+threads\UnicastListener.class
 views\MulticastChat.class
 views\Login$1.class
 components\PlaceholderTextField$1.class

@@ -3,6 +3,7 @@ import network.Client;
 import components.ImageLabel;
 import components.PlaceholderPasswordField;
 import components.PlaceholderTextField;
+import dto.ResponseDto;
 import javax.swing.JOptionPane;
 import utils.AppColors;
 import utils.FontAwesomeIcons;
@@ -146,24 +147,29 @@ public class Register extends javax.swing.JFrame {
     String username = inputUsername.getText();
     String password = InputPassword.getText();
 
-    if(username.isEmpty()) {
+    if(username.isEmpty() && username.equals("Usuario")) {
       JOptionPane.showMessageDialog(this, "Por favor ingresa tu nombre de usuario.", "Error", JOptionPane.ERROR_MESSAGE);
       return;
     }
 
-    if(password.isEmpty()) {
+    if(password.isEmpty() && password.equals("Contraseña")) {
       JOptionPane.showMessageDialog(this, "Por favor ingresa una contraseña.", "Error", JOptionPane.ERROR_MESSAGE);
     }
 
     Client client = Client.getInstanceClient();
-    String response = client.registerUser(username, password);
-    JOptionPane.showMessageDialog(this, response, "Success", JOptionPane.INFORMATION_MESSAGE);
+    ResponseDto response = client.registerUser(username, password);
     
-    // Limpiar campos y dirigir al Login.
-    inputUsername.setText("");
-    InputPassword.setText("");
-    Login.getInstanceLogin().setVisible(true);
-    setVisible(false);
+    if(response.getError()) {
+      JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    }
+    
+    else {
+      JOptionPane.showMessageDialog(this, response.getMessage(), "Success", JOptionPane.INFORMATION_MESSAGE);
+      inputUsername.setText("");
+      InputPassword.setText("");
+      Login.getInstanceLogin().setVisible(true);
+      setVisible(false);
+    }
   }//GEN-LAST:event_RegisterBtnActionPerformed
 
   private void BtnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnBackActionPerformed

@@ -29,6 +29,7 @@ public class Server {
       System.out.println("Servidor multicast iniciado en puerto: " + SERVER_PORT);
       listen();
     } catch (Exception e) {
+      e.printStackTrace();
     }
   }
   
