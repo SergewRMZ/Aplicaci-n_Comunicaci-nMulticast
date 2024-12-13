@@ -1,6 +1,5 @@
-package controller;
+package network;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -20,15 +19,18 @@ import threads.MulticastListener;
 public class Client {
   // Información sobre la conexión al servidor.
   private static Client instance;
-  private Gson gson;
   private int port = 8000;
   private int CLIENT_PORT;
   private final String SERVER_HOST = "127.0.0.1";
   private MulticastSocket socketClient;
   private InetAddress serverAddress;
+  String ipAddress;
   
   // Datos del Usuario
   private UserModel user;
+ 
+  // Gestor de Usuarios conectados
+  UsersManager usersManager;
   
   // ALBERCA DE HILOS
   private ExecutorService threadPool;
@@ -43,10 +45,20 @@ public class Client {
       socketClient.setLoopbackMode(false);
       socketClient.setTimeToLive(255);
       serverAddress = InetAddress.getByName(SERVER_HOST);
+      ipAddress = InetAddress.getLocalHost().getHostAddress();
+      
       CLIENT_PORT = socketClient.getLocalPort();
-      this.gson = new Gson();
+      
+      // Datos Multicast
+      chatRoom = new ChatRoomDto("Grupo", "230.0.0.1", 8010);
+      
+      // Gestor de usuarios
+      usersManager = UsersManager.getInstance();
+      
+      // Alberca de hilos
       this.threadPool = Executors.newFixedThreadPool(MAX_CHATROOMS);
       System.out.println("Cliente unido al servidor " + SERVER_HOST);
+      System.out.println("Dirección local " + ipAddress);
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -90,8 +102,8 @@ public class Client {
       e.printStackTrace();
     }
     
-    return null; // Si no hay respuesta devuelve null
-  } // RegisterUser
+    return null; 
+  }
   
   public ResponseDto loginUser (String username, String password) {
     try {
@@ -102,13 +114,13 @@ public class Client {
       user.addProperty("password", password);
       data.add("user", user);
       data.addProperty("port", socketClient.getLocalPort());
+      data.addProperty("ipAddress", ipAddress);
       
       sendRequest(data);
       String response = getServerResponse();
-      System.out.println(response);
       JsonObject jsonResponse = JsonParser.parseString(response).getAsJsonObject();
       if (jsonResponse.has("status") && jsonResponse.get("status").getAsString().equals("success")) {
-        this.user = new UserModel(jsonResponse.get("id").getAsString(), jsonResponse.get("username").getAsString(), socketClient.getLocalPort());
+        this.user = new UserModel(jsonResponse.get("id").getAsString(), jsonResponse.get("username").getAsString(), socketClient.getLocalPort(), ipAddress);
         String message = jsonResponse.get("message").getAsString();
         return new ResponseDto(false, message, this.user);
       }
@@ -131,8 +143,7 @@ public class Client {
       JsonObject request = new JsonObject();
       request.addProperty("action", "disconnect");
       request.addProperty("id", user.getUserId());
-      request.addProperty("username", user.getUsername());
-      request.addProperty("port", user.getPort());
+      
       sendRequest(request);
       System.out.println("Cerrando sesión");
       String response = getServerResponse();
@@ -146,6 +157,11 @@ public class Client {
     }
   }
   
+  /**
+   * Método para el envio de mensajes multicast, los datos del grupo
+   * están almacenados en el objecto ChatRoom que contiene la dirección multicast y puerto.
+   * @param message Mensaje que se enviará al grupo multicast.
+   */
   public void sendMessage(String message) {
     try {
       JsonObject jsonMessage = new JsonObject();
@@ -160,61 +176,41 @@ public class Client {
     }
   }
   
-  public void getUserGroup () {
+  /**
+   * Método para el envio de mensajes privados. Recibe el nombre del usuario
+   * y con base en este se obtiene sus datos sobre su dirección ip y puerto específico
+   * para enviar el mensaje.
+   * @param message Mensaje a enviar
+   * @param recipient Usuario destinatario.
+   */
+  public void sendMessagePrivate (String message, String recipient) {
+    UserModel userDest = usersManager.getModelByUsername(recipient);
     try {
-      JsonObject request = new JsonObject();
-      request.addProperty("action", "getUserGroups");
-      request.addProperty("idUser", user.getUserId());
-      sendRequest(request);
-      String response = getServerResponse();
-      JsonObject jsonResponse = gson.fromJson(response, JsonObject.class);
-      System.out.println(jsonResponse);
-      if (jsonResponse.has("status")) {
-        String status = jsonResponse.get("status").getAsString();
-        if (status.equals("success")) {
-          JsonObject groupJson = jsonResponse.getAsJsonObject("group");
-          this.chatRoom = gson.fromJson(groupJson, ChatRoomDto.class);
-          
-          // Inicio de hilo para escuchar en el grupo, dirección de grupo, puerto de grupo y puerto de usuario.
-          this.threadPool.submit(new MulticastListener(chatRoom.getAddress(), chatRoom.getPort(), this.CLIENT_PORT));
-        }
-        
-        else if(status.equals("not_found")) {
-          System.out.println("No te has unido al grupo");
-          // Preguntar si desea unirse a un grupo
-        }
-      }
+      JsonObject jsonMessage = new JsonObject();
+      jsonMessage.addProperty("action", "message-private");
+      jsonMessage.addProperty("sender", user.getUsername());
+      jsonMessage.addProperty("recipient", recipient);
+      jsonMessage.addProperty("message", message);
+
+      byte[] data = jsonMessage.toString().getBytes();
+      InetAddress ipAddressDest = InetAddress.getByName(userDest.getIpAddress());
+      DatagramPacket packet = new DatagramPacket(
+              data, 
+              data.length, 
+              ipAddressDest, 
+              userDest.getPort()
+      );
+
+      socketClient.send(packet);
+      System.out.println("Mensaje enviado a " + recipient);
     } catch (Exception e) {
+      System.err.println("Error al enviar el mensaje privado");
       e.printStackTrace();
     }
   }
   
-  public void joinChatRoom(String roomName) {
-    try {
-      JsonObject request = new JsonObject();
-      request.addProperty("action", "joinRoom");
-      request.addProperty("roomName", roomName);
-      request.addProperty("username", user.getUsername());
-      request.addProperty("id", user.getUserId());
-      sendRequest(request);
-      
-      String response = getServerResponse();
-      JsonObject jsonResponse = JsonParser.parseString(response).getAsJsonObject();
-      System.out.println(jsonResponse);
-      if(jsonResponse.has("status")) {
-        String status = jsonResponse.get("status").getAsString();
-        if("success".equals(status)) {
-          System.out.println("Cargando grupo...");
-          if(jsonResponse.has("groupAddress")) {
-            String groupAddress = jsonResponse.get("groupAddress").getAsString();
-            String multicastAddress = groupAddress.split(":")[0];
-            int port = Integer.parseInt(groupAddress.split(":")[1]);
-            this.threadPool.submit(new MulticastListener(multicastAddress, port, this.CLIENT_PORT));
-          }
-        } 
-      }
-    } catch (Exception e) {
-    }
+  public void getUserGroup() {
+    this.threadPool.submit(new MulticastListener(chatRoom.getAddress(), chatRoom.getPort(), this.CLIENT_PORT));
   }
   
   public List<String> getUsersOnline() {
@@ -238,6 +234,13 @@ public class Client {
           for(JsonElement userElement: usersJson) {
             JsonObject userJson = userElement.getAsJsonObject();
             String username = userJson.get("username").getAsString();
+            int port = userJson.get("port").getAsInt();
+            String ipAddress = userJson.get("ipAddress").getAsString();
+            
+            // Agregar a la lista de usuarios conectados
+            UserModel userModel = new UserModel(username, port, ipAddress);
+            usersManager.addUserOnline(username, userModel);
+            
             usersOnline.add(username);
           }
         }
@@ -252,8 +255,6 @@ public class Client {
     
     return usersOnline;
   }
-  
-  
   
   /**
    * Método para enviar una solicitud al servidor.

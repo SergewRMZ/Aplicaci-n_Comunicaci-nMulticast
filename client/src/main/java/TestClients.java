@@ -1,7 +1,7 @@
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import controller.Client;
+import network.Client;
 import java.util.UUID;
 public class TestClients {
   public static void main(String args[]) {
@@ -23,7 +23,7 @@ public class TestClients {
       client.registerUser(username, password);
       
       client.loginUser(username, password);
-      client.joinChatRoom("Gamers");
+      client.getUserGroup();
     } catch (Exception e) {
       e.printStackTrace();
     }

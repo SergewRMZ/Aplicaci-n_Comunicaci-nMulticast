@@ -1,4 +1,4 @@
-import controller.Client;
+import network.Client;
 import java.util.Scanner;
 public class Test {
   /**

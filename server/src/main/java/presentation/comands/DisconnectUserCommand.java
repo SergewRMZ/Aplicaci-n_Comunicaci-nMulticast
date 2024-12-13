@@ -15,12 +15,10 @@ public class DisconnectUserCommand implements Command {
   
   @Override
   public void execute() {
-    if(data.has("id") && data.has("username")) {
+    if(data.has("id")) {
       String id = data.get("id").getAsString();
-      String username = data.get("username").getAsString();
-      int port = data.get("port").getAsInt();
-      UserModel userModelDelete = new UserModel(id, username, port);
-      SessionManager.getInstance().removeActiveUser(userModelDelete);
+      
+      SessionManager.getInstance().removeActiveUser(id);
 
       response.addProperty("status", "success");
       response.addProperty("message", "Sesión cerrada correctamente");
@@ -28,7 +26,7 @@ public class DisconnectUserCommand implements Command {
 
     else {
       response.addProperty("status", "error");
-      response.addProperty("message", "Es necesario enviar el identificador de usuario, su nombre de usuario y su puerto");
+      response.addProperty("message", "Es necesario enviar el identificador de usuario");
     }
   }
 
