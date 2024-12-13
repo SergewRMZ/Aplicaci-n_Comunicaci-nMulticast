@@ -1,23 +1,25 @@
-C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\views\MulticastChat.java
-C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\components\RoundedBorder.java
-C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\TestClients.java
-C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\components\EmojiComponent.java
-C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\views\Login.java
-C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\components\PlaceholderTextField.java
-C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\Test2.java
-C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\utils\ImageLoader.java
-C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\utils\AppColors.java
-C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\utils\FontAwesomeIcons.java
-C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\components\UserInfoComponent.java
-C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\views\Register.java
-C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\dto\ChatRoomDto.java
-C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\model\UserModel.java
-C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\dto\ResponseDto.java
-C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\components\PlaceholderPasswordField.java
-C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\components\MessageComponent.java
-C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\network\Client.java
-C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\network\UsersManager.java
-C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\Test.java
-C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\threads\MulticastListener.java
-C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\components\ImageLabel.java
-C:\Users\serge\OneDrive\Escritorio\6to Semestre\Redes II\App_RedSocial\client\src\main\java\App.java
+C:\Users\ville\Desktop\ChatMulticast\client\src\main\java\dto\ChatRoomDto.java
+C:\Users\ville\Desktop\ChatMulticast\client\src\main\java\components\MessageComponent.java
+C:\Users\ville\Desktop\ChatMulticast\client\src\main\java\utils\AppColors.java
+C:\Users\ville\Desktop\ChatMulticast\client\src\main\java\utils\ImageLoader.java
+C:\Users\ville\Desktop\ChatMulticast\client\src\main\java\views\Login.java
+C:\Users\ville\Desktop\ChatMulticast\client\src\main\java\components\PlaceholderPasswordField.java
+C:\Users\ville\Desktop\ChatMulticast\client\src\main\java\Test.java
+C:\Users\ville\Desktop\ChatMulticast\client\src\main\java\views\Register.java
+C:\Users\ville\Desktop\ChatMulticast\client\src\main\java\utils\FontAwesomeIcons.java
+C:\Users\ville\Desktop\ChatMulticast\client\src\main\java\network\Client.java
+C:\Users\ville\Desktop\ChatMulticast\client\src\main\java\App.java
+C:\Users\ville\Desktop\ChatMulticast\client\src\main\java\dto\ResponseDto.java
+C:\Users\ville\Desktop\ChatMulticast\client\src\main\java\components\PlaceholderTextField.java
+C:\Users\ville\Desktop\ChatMulticast\client\src\main\java\threads\MulticastListener.java
+C:\Users\ville\Desktop\ChatMulticast\client\src\main\java\TestClients.java
+C:\Users\ville\Desktop\ChatMulticast\client\src\main\java\components\RoundedBorder.java
+C:\Users\ville\Desktop\ChatMulticast\client\src\main\java\views\MulticastChat.java
+C:\Users\ville\Desktop\ChatMulticast\client\src\main\java\threads\UnicastListener.java
+C:\Users\ville\Desktop\ChatMulticast\client\src\main\java\components\EmojiComponent.java
+C:\Users\ville\Desktop\ChatMulticast\client\src\main\java\components\UserInfoComponent.java
+C:\Users\ville\Desktop\ChatMulticast\client\src\main\java\network\UsersManager.java
+C:\Users\ville\Desktop\ChatMulticast\client\src\main\java\Test2.java
+C:\Users\ville\Desktop\ChatMulticast\client\src\main\java\components\ImageLabel.java
+C:\Users\ville\Desktop\ChatMulticast\client\src\main\java\components\Gif.java
+C:\Users\ville\Desktop\ChatMulticast\client\src\main\java\model\UserModel.java
