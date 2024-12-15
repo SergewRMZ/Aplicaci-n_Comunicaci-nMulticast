@@ -13,7 +13,7 @@ public class Test2 {
         System.out.println("Saliendo...");
         break;
       }
-      client.sendMessage(message);
+      client.sendMessage(message, "ChatGrupal");
     }
     
     scanner.close();

@@ -1,7 +1,5 @@
 package threads;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.net.DatagramPacket;
@@ -14,11 +12,13 @@ import views.MulticastChat;
 public class MulticastListener implements Runnable {
   private final String multicastAddress;
   private final int port;
+  private final int localPort;
   private MulticastSocket socket;
   
-  public MulticastListener(String multicastAddress, int port) {
+  public MulticastListener(String multicastAddress, int port, int localPort) {
     this.multicastAddress = multicastAddress;
     this.port = port;
+    this.localPort = localPort;
     
     System.out.println("Multicast Address: " + multicastAddress);
     System.out.println("Puerto multicast: " + port);
@@ -32,8 +32,6 @@ public class MulticastListener implements Runnable {
   public void run() {
     try (MulticastSocket socket = new MulticastSocket(port)){
       this.socket = socket;
-      this.socket.setLoopbackMode(true);
-      
       InetAddress group = InetAddress.getByName(multicastAddress);
       socket.joinGroup(group);
       System.out.println("Escuchando en el grupo multicast: " + multicastAddress);
@@ -41,7 +39,9 @@ public class MulticastListener implements Runnable {
       byte[] buffer = new byte[1024];
       while(true) {
         DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-        socket.receive(packet);        
+        socket.receive(packet);    
+        
+        if(localPort == packet.getPort()) continue;
         
         System.out.println("Mensaje recibido: " + new String(packet.getData(), 0, packet.getLength()));
         String message = new String(packet.getData(), 0, packet.getLength());
@@ -62,7 +62,7 @@ public class MulticastListener implements Runnable {
       e.printStackTrace();
     }
   }
-  
+   
   public void closeSocket() {
     if (socket != null && !socket.isClosed()) {
       try {
@@ -104,8 +104,9 @@ public class MulticastListener implements Runnable {
   }
   
   private void handleMessageMulticast(JsonObject json) {
-    String username = json.get("username").getAsString();
+    String sender = json.get("sender").getAsString();
+    String recipient = json.get("recipient").getAsString();
     String message = json.get("message").getAsString(); // Obtener el mensaje
-    MulticastChat.getInstance().addMessage(username, message, false);
+    MulticastChat.getInstance().addMessage(sender, recipient, message, false, false);
   }
 }

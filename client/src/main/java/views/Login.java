@@ -183,12 +183,16 @@ public class Login extends javax.swing.JFrame {
     
     else {
         JOptionPane.showMessageDialog(this, response.getMessage(), "Success", JOptionPane.INFORMATION_MESSAGE);
-        setVisible(false);
-        client.getUserGroup();
-        System.out.println("Hilos iniciados");
+        MulticastChat main = MulticastChat.getInstance();
         UserModel userModel = (UserModel) response.getObject();
-        MulticastChat.getInstance().setUserModel(userModel);
-        MulticastChat.getInstance().setVisible(true);
+
+        setVisible(false);
+        
+        client.getUserGroup(); // Abrir socket multicast
+        main.setUserModel(userModel);
+        main.setUsersOnline();
+        client.listenUnicast();
+        main.setVisible(true);
     }
   }//GEN-LAST:event_LoginBtnActionPerformed
 

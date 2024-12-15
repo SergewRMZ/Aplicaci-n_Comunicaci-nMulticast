@@ -150,37 +150,9 @@ public class Client {
       
       sendRequest(request);
       System.out.println("Cerrando sesión");
-      String response = getServerResponse();
-      System.out.println(response);
       
-      if(socketClient != null && !socketClient.isClosed()) {
-        socketClient.close();
-      }
-      
-      if(threadPool != null) {
-        threadPool.shutdownNow();
-      }
     } catch (Exception e) {
       e.printStackTrace();
-    }
-  }
-  
-  /**
-   * Método para el envio de mensajes multicast, los datos del grupo
-   * están almacenados en el objecto ChatRoom que contiene la dirección multicast y puerto.
-   * @param message Mensaje que se enviará al grupo multicast.
-   */
-  public void sendMessage(String message) {
-    try {
-      JsonObject jsonMessage = new JsonObject();
-      jsonMessage.addProperty("action", "message");
-      jsonMessage.addProperty("username", this.user.getUsername());
-      jsonMessage.addProperty("message", message);
-      byte[] data = jsonMessage.toString().getBytes();
-      DatagramPacket packet = new DatagramPacket(data, data.length, InetAddress.getByName(chatRoom.getAddress()), chatRoom.getPort());
-      socketClient.send(packet);
-      System.out.println("Mensaje enviado al grupo multicast");
-    } catch (Exception e) {
     }
   }
   
@@ -191,11 +163,11 @@ public class Client {
    * @param message Mensaje a enviar
    * @param recipient Usuario destinatario.
    */
-  public void sendMessagePrivate (String message, String recipient) {
+  public void sendMessage(String message, String recipient) {
     UserModel userDest = usersManager.getModelByUsername(recipient);
     try {
       JsonObject jsonMessage = new JsonObject();
-      jsonMessage.addProperty("action", "message-private");
+      jsonMessage.addProperty("action", "message");
       jsonMessage.addProperty("sender", user.getUsername());
       jsonMessage.addProperty("recipient", recipient);
       jsonMessage.addProperty("message", message);
@@ -218,7 +190,10 @@ public class Client {
   }
   
   public void getUserGroup() {
-    this.threadPool.submit(new MulticastListener(chatRoom.getAddress(), chatRoom.getPort()));
+    String groupName = "ChatGrupal";
+    UserModel userModel = new UserModel(groupName, chatRoom.getPort(), chatRoom.getAddress());
+    UsersManager.getInstance().addUserOnline(groupName, userModel);
+    this.threadPool.submit(new MulticastListener(chatRoom.getAddress(), chatRoom.getPort(), socketClient.getLocalPort()));
   }
   
   public void listenUnicast() {

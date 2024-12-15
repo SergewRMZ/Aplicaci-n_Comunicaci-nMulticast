@@ -26,7 +26,6 @@ public class MulticastChat extends javax.swing.JFrame {
   private final String PATH_IMG_LABEL = "/logo.png";
   
   private Map<String, JPanel> chats = new HashMap<>();
-  private boolean isMulticast = true;
   private String selectedUser = null;
   
   
@@ -35,8 +34,6 @@ public class MulticastChat extends javax.swing.JFrame {
     setLocationRelativeTo(null);
     pane.setLayout(new BoxLayout(pane, BoxLayout.Y_AXIS)); // Panel de grupo
     paneFriends.setLayout(new BoxLayout(paneFriends, BoxLayout.Y_AXIS));
-    setUsersOnline();
-    Client.getInstanceClient().listenUnicast();
     openChat("ChatGrupal");
   }
   
@@ -56,13 +53,15 @@ public class MulticastChat extends javax.swing.JFrame {
    * Método para establecer los usuarios en linea. Realiza una petición get al servidor
    * el cual devuelve la lista de usuarios activos.
    */
-  private void setUsersOnline() {
+  public void setUsersOnline() {
     Client client = Client.getInstanceClient();
     List<String> usersOnline = client.getUsersOnline();
     
     if(usersOnline!=null) {
       for(String username: usersOnline) {
-        addUser(username);
+        // Condición para evitar que coloque al usuario en la lista.
+        if (!username.equals(userModel.getUsername()))
+          addUser(username);
       }
     }
   }
@@ -80,8 +79,7 @@ public class MulticastChat extends javax.swing.JFrame {
   public void removeUser(String username) {
     for(int i = 0; i < paneFriends.getComponentCount(); i++) {
       JComponent component = (JComponent) paneFriends.getComponent(i);
-      if(component instanceof JButton) {
-        JButton userBtn = (JButton) component;
+      if(component instanceof JButton userBtn) {
         if(userBtn.getText().equals(username)) {
           paneFriends.remove(i);
           break;
@@ -109,8 +107,8 @@ public class MulticastChat extends javax.swing.JFrame {
     
     // Estableciendo el borde del botón
     userBtn.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(AppColors.PRIMARY_COLOR, 2),
-            BorderFactory.createEmptyBorder(5, 10, 5, 10)
+      BorderFactory.createLineBorder(AppColors.PRIMARY_COLOR, 2),
+      BorderFactory.createEmptyBorder(5, 10, 5, 10)
     ));
     
     // Se agrega la acción
@@ -124,11 +122,9 @@ public class MulticastChat extends javax.swing.JFrame {
   }
   
   private void openChat(String username) {
-    this.isMulticast = username.equals("ChatGrupal");
     selectedUser = username;
     
     if(chats.containsKey(username)) {
-      
       JPanel chatPanel = chats.get(username);
       ScrollPane.setViewportView(chatPanel);
       this.pane = chatPanel;
@@ -150,25 +146,7 @@ public class MulticastChat extends javax.swing.JFrame {
     ScrollPane.repaint();
   }
   
-  /**
-   * Este método se llama para limpiar la lista de usuarios en línea y 
-   * posteriormente actualizarla
-   */
-  public void clearUsersList() {
-    paneFriends.removeAll();
-    paneFriends.revalidate();
-    paneFriends.repaint();
-  }
-  
-  /**
-   * Este método se implementa para poder agregar un mensaje en la vista.
-   * Se agrega el mensaje del lado derecho cuando el mensaje pertenece al usuario
-   * y se agrega del lado izquierdo cuando el mensaje es un mensaje externo.
-   * @param username Nombre de usuario que envió el mensaje
-   * @param message Mensaje del usuario
-   * @param alignRight Alinear dependiendo el tipo de mensaje
-   */
-  public void addMessage(String username, String message, boolean alignRight) {
+  private JPanel createMessage(String username, String message, boolean alignRight) {
     JLabel usernameLabel = new JLabel(username);
     usernameLabel.setFont(new Font("Lucida Sans", Font.PLAIN, 16));
     usernameLabel.setForeground(AppColors.getGRAY_COLOR());
@@ -181,7 +159,6 @@ public class MulticastChat extends javax.swing.JFrame {
     messageLabel.setOpaque(true);
     messageLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
-    // Crear contenedor para el mensaje
     JPanel messagePanel = new JPanel();
     messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.Y_AXIS));
     
@@ -198,11 +175,45 @@ public class MulticastChat extends javax.swing.JFrame {
     messagePanel.add(usernameLabel);
     messagePanel.add(Box.createVerticalStrut(5));
     messagePanel.add(messageLabel);
+    return messagePanel;
+  }
+  
+  /**
+   * 
+   * @param username Nombre de usuario que envió el mensaje
+   * @param recipient
+   * @param message Mensaje del usuario
+   * @param alignRight Alinear dependiendo el tipo de mensaje
+   */
+  public void addMessage(String username, String recipient, String message, boolean alignRight, boolean isPrivate) {
+    JPanel messagePanel = createMessage(username, message, alignRight);
+    String paneToSearch;
+    if(isPrivate) {
+      paneToSearch = username;
+    }
     
-    pane.add(messagePanel);
-    pane.add(Box.createVerticalStrut(10));
-    pane.revalidate();
-    pane.repaint();
+    else {
+      paneToSearch = recipient; 
+    }
+    JPanel chatPanel = chats.computeIfAbsent(paneToSearch, k -> {
+      System.out.println("Creando panel para " + paneToSearch);
+      JPanel panel = new JPanel();
+      panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+      return panel;
+    });
+    
+    if(recipient.equals(selectedUser) || username.equals(selectedUser)) {
+      pane.add(messagePanel);
+      pane.add(Box.createVerticalStrut(10));
+      pane.revalidate();
+      pane.repaint();
+    }
+    
+    else {
+      System.out.println("Agregando mensaje en " + paneToSearch + " - chat no abierto");
+      chatPanel.add(messagePanel);
+      chatPanel.add(Box.createVerticalStrut(10));
+    }
   }
 
   
@@ -350,15 +361,8 @@ public class MulticastChat extends javax.swing.JFrame {
     if(!textFieldMessage.equals("Escribe un mensaje...") && !textFieldMessage.equals("")) {
       Client client = Client.getInstanceClient();
       String message = textFieldMessage.getText();
-      if(this.isMulticast) {
-        client.sendMessage(message);
-      }
-      
-      else {
-        client.sendMessagePrivate(message, selectedUser);
-      }
-      
-      addMessage(userModel.getUsername(), message, true);
+      client.sendMessage(message, selectedUser);
+      addMessage(userModel.getUsername(), selectedUser, message, true, false);
       textFieldMessage.setText("");
     }
   }//GEN-LAST:event_textFieldMessageActionPerformed

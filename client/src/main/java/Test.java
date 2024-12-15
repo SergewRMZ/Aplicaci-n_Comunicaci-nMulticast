@@ -20,7 +20,7 @@ public class Test {
         break;
       }
       
-      client.sendMessage(message);
+      client.sendMessage(message, "ChatGrupal");
     }
     System.out.println("Programa terminado");
     scanner.close();

@@ -40,6 +40,7 @@ public class SessionManager {
     try {
       activeSessions.put(userModel, chatRoom);
       sendNewUserNotification(userModel);
+      showUsers();
     } finally {
       lock.unlock();
     }
@@ -65,6 +66,7 @@ public class SessionManager {
       
       activeSessions.remove(userToRemove);
       sendUserDisconnectedNotification(userToRemove);
+      showUsers();
     } finally {
       lock.unlock();
     }
@@ -141,7 +143,7 @@ public class SessionManager {
   private void showUsers() {
     System.out.println("Usuarios conectados: ");
     for(UserModel user : activeSessions.keySet()) {
-      System.out.println(user.getUsername());
+      System.out.println("\t" + user.getUsername());
     }
   }
 }
