@@ -18,8 +18,8 @@ public class FontAwesomeIcons {
   }
   
     public static Icon EmojiIcon(int size) {
-        FontIcon icon = FontIcon.of(FontAwesomeSolid.BLIND, size);
-        icon.setIconColor(AppColors.PRIMARY_COLOR);
+        FontIcon icon = FontIcon.of(FontAwesomeSolid.TREE, size);
+        icon.setIconColor(AppColors.GREEN_COLOR);
         return icon;
     }
     

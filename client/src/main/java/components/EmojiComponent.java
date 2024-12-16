@@ -22,7 +22,7 @@ public class EmojiComponent extends javax.swing.JPanel {
   }
   
   private void setIconEmoji () {
-    this.labelEmojiIcon.setIcon(FontAwesomeIcons.EmojiIcon(20));
+    this.labelEmojiIcon.setIcon(FontAwesomeIcons.EmojiIcon(35));
     this.labelEmojiIcon.setHorizontalAlignment(SwingConstants.CENTER);
     this.labelEmojiIcon.setVerticalAlignment(SwingConstants.CENTER);
   }

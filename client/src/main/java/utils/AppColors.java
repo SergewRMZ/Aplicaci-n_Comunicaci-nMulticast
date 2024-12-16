@@ -13,6 +13,7 @@ public class AppColors {
   public static final Color WHITE_COLOR = new Color(0xFFFFFF);
   public static final Color SUCCESS_COLOR = new Color(0x3DEB75);
   public static final Color DANGER_COLOR = new Color(0xEA242C);
+  public static final Color GREEN_COLOR = new Color(0x008000);
   public static Color getPRIMARY_COLOR() {
     return PRIMARY_COLOR;
   }
