@@ -7,6 +7,7 @@ Test.class
 views\MulticastChat$3.class
 views\Register$1.class
 views\MulticastChat$1.class
+components\BtnFriend.class
 components\ImageLabel.class
 model\UserModel.class
 views\Login.class

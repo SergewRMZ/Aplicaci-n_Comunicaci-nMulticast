@@ -12,6 +12,7 @@ public class App {
     SwingUtilities.invokeLater(() -> {
       try {
         FlatLightLaf.setup();
+        UIManager.put("Panel.arc", 100);
         UIManager.put("Button.arc", 100);
         UIManager.setLookAndFeel(new FlatLightLaf());
         Login main = Login.getInstanceLogin();

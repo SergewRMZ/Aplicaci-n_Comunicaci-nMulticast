@@ -1,5 +1,6 @@
 package views;
 
+import components.BtnFriend;
 import components.ImageLabel;
 import components.PlaceholderTextField;
 import network.Client;
@@ -13,7 +14,6 @@ import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -77,70 +77,58 @@ public class MulticastChat extends javax.swing.JFrame {
   }
   
   public void removeUser(String username) {
+    int index = getIndexOfBtnFriend(username);
+    if(index != -1) {
+      paneFriends.remove(index);
+      paneFriends.revalidate();
+      paneFriends.repaint();
+    }
+  }
+  
+  private int getIndexOfBtnFriend(String username) {
     for(int i = 0; i < paneFriends.getComponentCount(); i++) {
       JComponent component = (JComponent) paneFriends.getComponent(i);
-      if(component instanceof JButton userBtn) {
-        if(userBtn.getText().equals(username)) {
-          paneFriends.remove(i);
-          break;
+      if(component instanceof BtnFriend userBtn) {
+        if(userBtn.getBtnUsername().getText().equals(username)) {
+          return i;
         }
       }
     }
     
-    paneFriends.revalidate();
-    paneFriends.repaint();
+    return -1;
   }
   
-  /**
-   * Método se llama para agregar un nuevo usuario en la lista de usuarios conectados de la interfaz
-   * @param username Nombre del usuario en línea.
-   */
+  private BtnFriend createBtnUserConnected(String username) {
+    BtnFriend btnUserConnected = new BtnFriend();
+    btnUserConnected.setUsername(username);
+    return btnUserConnected;
+  }
+ 
   public void addUser(String username) {
-    JButton userBtn = new JButton(username);
-    
-    // Se establece la fuente, alineamiento, tamaño y cursor.
-    userBtn.setFont(new Font("Lucida Sans", 0, 16));
-    userBtn.setOpaque(true);
-    userBtn.setAlignmentX(JComponent.CENTER_ALIGNMENT);
-    userBtn.setPreferredSize(new Dimension(paneFriends.getWidth(), 25));
-    userBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-    
-    // Estableciendo el borde del botón
-    userBtn.setBorder(BorderFactory.createCompoundBorder(
-      BorderFactory.createLineBorder(AppColors.PRIMARY_COLOR, 2),
-      BorderFactory.createEmptyBorder(5, 10, 5, 10)
-    ));
-    
-    // Se agrega la acción
-    userBtn.addActionListener(e -> openChat(username));
-    
+    BtnFriend btnUserConnected = createBtnUserConnected(username);
+    btnUserConnected.getBtnUsername().addActionListener(e -> openChat(username));
     paneFriends.add(Box.createVerticalStrut(5));
-    paneFriends.add(userBtn);
-    
+    paneFriends.add(btnUserConnected);
     paneFriends.revalidate();
     paneFriends.repaint();
   }
   
   private void openChat(String username) {
     selectedUser = username;
-    
+    JPanel chatPanel;
     if(chats.containsKey(username)) {
-      JPanel chatPanel = chats.get(username);
-      ScrollPane.setViewportView(chatPanel);
-      this.pane = chatPanel;
+      chatPanel = chats.get(username);
+      this.labelDestLabel.setText(username);
     }
     
     else {
-      JPanel chatPanel = new JPanel();
+      chatPanel = new JPanel();
       chatPanel.setLayout(new BoxLayout(chatPanel, BoxLayout.Y_AXIS));
-      
-      // Almacenar el chat
       chats.put(username, chatPanel);
-      
-      // Mostrar el nuevo chat
-      ScrollPane.setViewportView(chatPanel);
-      this.pane = chatPanel;
     }
+    
+    ScrollPane.setViewportView(chatPanel);
+    this.pane = chatPanel;
     
     ScrollPane.revalidate();
     ScrollPane.repaint();
@@ -163,13 +151,13 @@ public class MulticastChat extends javax.swing.JFrame {
     messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.Y_AXIS));
     
     if (alignRight) {
-        messageLabel.setBackground(AppColors.getPRIMARY_COLOR());
+      messageLabel.setBackground(AppColors.getPRIMARY_COLOR());
     } else {
-        messageLabel.setBackground(AppColors.getSECONDARY_COLOR());
+      messageLabel.setBackground(AppColors.getBLUE_LIGHT_COLOR());
     }
     
     messagePanel.setOpaque(true);
-    messagePanel.setBackground(Color.GREEN);
+    messagePanel.setBackground(AppColors.getGRAY_LIGHT_COLOR());
     
     // Agregar usuario y mensaje.
     messagePanel.add(usernameLabel);
@@ -179,24 +167,29 @@ public class MulticastChat extends javax.swing.JFrame {
   }
   
   /**
-   * 
-   * @param username Nombre de usuario que envió el mensaje
-   * @param recipient
-   * @param message Mensaje del usuario
-   * @param alignRight Alinear dependiendo el tipo de mensaje
+   * Este método inserta un mensaje en la interfaz gráfica.
+   * @param username Nombre de usuario que envió el mensaje.
+   * @param recipient Nombre del usuario destino.
+   * @param message Mensaje del usuario.
+   * @param alignRight Alinear dependiendo el tipo de mensaje.
+   * @param isPrivate True si el mensaje a insertar en la interfaz es un mensaje privado.
    */
   public void addMessage(String username, String recipient, String message, boolean alignRight, boolean isPrivate) {
     JPanel messagePanel = createMessage(username, message, alignRight);
     String paneToSearch;
+    int index;
+    
     if(isPrivate) {
       paneToSearch = username;
+      index = getIndexOfBtnFriend(username);
     }
     
     else {
       paneToSearch = recipient; 
+      index = getIndexOfBtnFriend(recipient);
     }
+    
     JPanel chatPanel = chats.computeIfAbsent(paneToSearch, k -> {
-      System.out.println("Creando panel para " + paneToSearch);
       JPanel panel = new JPanel();
       panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
       return panel;
@@ -210,12 +203,26 @@ public class MulticastChat extends javax.swing.JFrame {
     }
     
     else {
-      System.out.println("Agregando mensaje en " + paneToSearch + " - chat no abierto");
       chatPanel.add(messagePanel);
       chatPanel.add(Box.createVerticalStrut(10));
+      increaseMessageNotification(index);
     }
   }
-
+  
+  private void increaseMessageNotification(int index) {
+    BtnFriend component = (BtnFriend) paneFriends.getComponent(index);
+    component.incrementCounter();
+    paneFriends.revalidate();
+    paneFriends.repaint();
+  }
+  
+  private void resetMessageNotification(int index) {
+    BtnFriend component = (BtnFriend) paneFriends.getComponent(index);
+    component.resetCounter();
+    paneFriends.revalidate();
+    paneFriends.repaint();
+  }
+  
   
   /**
    * This method is called from within the constructor to initialize the form.
@@ -231,13 +238,14 @@ public class MulticastChat extends javax.swing.JFrame {
     LabelUsers = new javax.swing.JLabel();
     labelImg = new ImageLabel(PATH_IMG_LABEL);
     BtnLogout = new javax.swing.JButton();
-    userInfoComponent = new components.UserInfoComponent();
     scrollPaneFriends = new javax.swing.JScrollPane();
     paneFriends = new javax.swing.JPanel();
     btnGroupChat = new javax.swing.JButton();
+    userInfoComponent = new components.UserInfoComponent();
     ContainerMessage = new javax.swing.JPanel();
     textFieldMessage = new PlaceholderTextField("Escribe un mensaje...");
     welcomePanel = new javax.swing.JPanel();
+    labelDestLabel = new javax.swing.JLabel();
     ScrollPane = new javax.swing.JScrollPane();
     pane = new javax.swing.JPanel();
 
@@ -251,17 +259,17 @@ public class MulticastChat extends javax.swing.JFrame {
     PanelLateral.setForeground(new java.awt.Color(255, 255, 255));
     PanelLateral.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-    LabelUsers.setFont(new java.awt.Font("Goudy Old Style", 1, 18)); // NOI18N
+    LabelUsers.setFont(new java.awt.Font("Lucida Sans", 1, 18)); // NOI18N
     LabelUsers.setForeground(new java.awt.Color(255, 255, 255));
     LabelUsers.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     LabelUsers.setText("En línea");
-    PanelLateral.add(LabelUsers, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 110, 70, -1));
+    PanelLateral.add(LabelUsers, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 110, 100, -1));
 
     labelImg.setPreferredSize(new java.awt.Dimension(250, 250));
     PanelLateral.add(labelImg, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 20, 180, 60));
 
     BtnLogout.setBackground(new java.awt.Color(204, 0, 0));
-    BtnLogout.setFont(new java.awt.Font("Goudy Old Style", 0, 24)); // NOI18N
+    BtnLogout.setFont(new java.awt.Font("JetBrains Mono", 0, 14)); // NOI18N
     BtnLogout.setForeground(new java.awt.Color(255, 255, 255));
     BtnLogout.setText("Cerrar Sesión");
     BtnLogout.addActionListener(new java.awt.event.ActionListener() {
@@ -269,38 +277,42 @@ public class MulticastChat extends javax.swing.JFrame {
         BtnLogoutActionPerformed(evt);
       }
     });
-    PanelLateral.add(BtnLogout, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 650, 160, -1));
+    PanelLateral.add(BtnLogout, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 710, 160, -1));
 
-    userInfoComponent.setBackground(new java.awt.Color(0, 0, 0));
-    PanelLateral.add(userInfoComponent, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 570, 200, 130));
+    scrollPaneFriends.setMaximumSize(new java.awt.Dimension(180, 250));
+    scrollPaneFriends.setPreferredSize(new java.awt.Dimension(180, 250));
+
+    paneFriends.setMaximumSize(new java.awt.Dimension(180, 250));
+    paneFriends.setPreferredSize(new java.awt.Dimension(180, 250));
 
     javax.swing.GroupLayout paneFriendsLayout = new javax.swing.GroupLayout(paneFriends);
     paneFriends.setLayout(paneFriendsLayout);
     paneFriendsLayout.setHorizontalGroup(
       paneFriendsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 177, Short.MAX_VALUE)
+      .addGap(0, 184, Short.MAX_VALUE)
     );
     paneFriendsLayout.setVerticalGroup(
       paneFriendsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 247, Short.MAX_VALUE)
+      .addGap(0, 250, Short.MAX_VALUE)
     );
 
     scrollPaneFriends.setViewportView(paneFriends);
 
-    PanelLateral.add(scrollPaneFriends, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 140, 180, 250));
+    PanelLateral.add(scrollPaneFriends, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 150, 200, 250));
 
-    btnGroupChat.setBackground(new java.awt.Color(51, 153, 255));
+    btnGroupChat.setBackground(AppColors.getSECONDARY_COLOR());
     btnGroupChat.setFont(new java.awt.Font("JetBrains Mono", 0, 18)); // NOI18N
     btnGroupChat.setForeground(new java.awt.Color(255, 255, 255));
-    btnGroupChat.setText("Grupo");
+    btnGroupChat.setText("Chat Grupal");
     btnGroupChat.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         btnGroupChatActionPerformed(evt);
       }
     });
-    PanelLateral.add(btnGroupChat, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 400, 180, 30));
+    PanelLateral.add(btnGroupChat, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 410, 180, 30));
+    PanelLateral.add(userInfoComponent, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 630, 200, 110));
 
-    PanelChat.add(PanelLateral, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 200, 700));
+    PanelChat.add(PanelLateral, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 200, 740));
 
     ContainerMessage.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -317,25 +329,36 @@ public class MulticastChat extends javax.swing.JFrame {
 
     PanelChat.add(ContainerMessage, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 630, 770, 60));
 
-    welcomePanel.setBackground(new java.awt.Color(255, 102, 102));
+    welcomePanel.setBackground(AppColors.getBLUE_COLOR());
+
+    labelDestLabel.setFont(new java.awt.Font("Lucida Sans", 1, 18)); // NOI18N
+    labelDestLabel.setForeground(new java.awt.Color(255, 255, 255));
+    labelDestLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+    labelDestLabel.setText("Chat Grupal");
 
     javax.swing.GroupLayout welcomePanelLayout = new javax.swing.GroupLayout(welcomePanel);
     welcomePanel.setLayout(welcomePanelLayout);
     welcomePanelLayout.setHorizontalGroup(
       welcomePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 780, Short.MAX_VALUE)
+      .addGroup(welcomePanelLayout.createSequentialGroup()
+        .addGap(16, 16, 16)
+        .addComponent(labelDestLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+        .addContainerGap(634, Short.MAX_VALUE))
     );
     welcomePanelLayout.setVerticalGroup(
       welcomePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 50, Short.MAX_VALUE)
+      .addGroup(welcomePanelLayout.createSequentialGroup()
+        .addContainerGap()
+        .addComponent(labelDestLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 38, Short.MAX_VALUE)
+        .addContainerGap())
     );
 
-    PanelChat.add(welcomePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 0, 780, 50));
+    PanelChat.add(welcomePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 0, 850, 50));
 
     pane.setLayout(new javax.swing.BoxLayout(pane, javax.swing.BoxLayout.X_AXIS));
     ScrollPane.setViewportView(pane);
 
-    PanelChat.add(ScrollPane, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 60, 760, 560));
+    PanelChat.add(ScrollPane, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 60, 840, 560));
 
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
     getContentPane().setLayout(layout);
@@ -343,15 +366,13 @@ public class MulticastChat extends javax.swing.JFrame {
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(layout.createSequentialGroup()
         .addContainerGap()
-        .addComponent(PanelChat, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        .addGap(52, 52, 52))
+        .addComponent(PanelChat, javax.swing.GroupLayout.DEFAULT_SIZE, 1062, Short.MAX_VALUE))
     );
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(layout.createSequentialGroup()
         .addContainerGap()
-        .addComponent(PanelChat, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        .addGap(43, 43, 43))
+        .addComponent(PanelChat, javax.swing.GroupLayout.DEFAULT_SIZE, 743, Short.MAX_VALUE))
     );
 
     pack();
@@ -420,6 +441,7 @@ public class MulticastChat extends javax.swing.JFrame {
   private javax.swing.JPanel PanelLateral;
   private javax.swing.JScrollPane ScrollPane;
   private javax.swing.JButton btnGroupChat;
+  private javax.swing.JLabel labelDestLabel;
   private javax.swing.JLabel labelImg;
   private javax.swing.JPanel pane;
   private javax.swing.JPanel paneFriends;

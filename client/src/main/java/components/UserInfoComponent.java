@@ -43,10 +43,11 @@ public class UserInfoComponent extends javax.swing.JPanel {
     labelUsername = new javax.swing.JLabel();
     labelUserIcon = new javax.swing.JLabel();
 
+    setBackground(new java.awt.Color(0, 0, 0));
     setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
     labelUsername.setBackground(new java.awt.Color(204, 0, 51));
-    labelUsername.setFont(new java.awt.Font("Goudy Old Style", 1, 24)); // NOI18N
+    labelUsername.setFont(new java.awt.Font("Lucida Sans", 0, 18)); // NOI18N
     labelUsername.setForeground(new java.awt.Color(255, 255, 255));
     labelUsername.setText("Username");
     add(labelUsername, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 40, 110, -1));
