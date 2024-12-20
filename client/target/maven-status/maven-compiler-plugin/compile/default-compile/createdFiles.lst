@@ -20,6 +20,7 @@ dto\ChatRoomDto.class
 components\MessageComponent.class
 views\Register$2.class
 components\PlaceholderPasswordField.class
+services\UserService.class
 views\MulticastChat$2.class
 components\UserInfoComponent.class
 Test2.class
