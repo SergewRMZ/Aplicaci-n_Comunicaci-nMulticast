@@ -17,10 +17,21 @@ public class FontAwesomeIcons {
     return icon;
   }
   
-    public static Icon EmojiIcon(int size) {
-        FontIcon icon = FontIcon.of(FontAwesomeSolid.BLIND, size);
-        icon.setIconColor(AppColors.PRIMARY_COLOR);
-        return icon;
-    }
-    
+  public static Icon emojiIcon(int size) {
+    FontIcon icon = FontIcon.of(FontAwesomeSolid.SMILE, size);
+    icon.setIconColor(AppColors.SECONDARY_COLOR);
+    return icon;
+  }
+  
+  public static Icon fileIcon(int size) {
+    FontIcon icon = FontIcon.of(FontAwesomeSolid.FILE, size);
+    icon.setIconColor(AppColors.SECONDARY_COLOR);
+    return icon;
+  }
+  
+  public static Icon sendIcon(int size) {
+    FontIcon icon = FontIcon.of(FontAwesomeSolid.PAPER_PLANE, size);
+    icon.setIconColor(AppColors.getBLUE_LIGHT_COLOR());
+    return icon;
+  }
 }

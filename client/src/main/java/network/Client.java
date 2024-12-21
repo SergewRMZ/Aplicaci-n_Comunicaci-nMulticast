@@ -1,10 +1,9 @@
 package network;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dto.ChatRoomDto;
+import dto.Metadata;
 import dto.ResponseDto;
 import java.io.File;
 import java.net.DatagramPacket;
@@ -15,6 +14,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import model.UserModel;
+import packet.Packet;
 import services.UserService;
 import threads.MulticastListener;
 import threads.UnicastListener;
@@ -106,6 +106,10 @@ public class Client {
       JsonObject jsonResponse = JsonParser.parseString(response).getAsJsonObject();
       if (jsonResponse.has("status") && jsonResponse.get("status").getAsString().equals("success")) {
         this.user = new UserModel(jsonResponse.get("id").getAsString(), jsonResponse.get("username").getAsString(), socketClient.getLocalPort(), localIpAddress);
+        
+        // Crear directorio del usuario
+        userService.createUserDirectory(this.user.getUsername());
+        
         String message = jsonResponse.get("message").getAsString();
         return new ResponseDto(false, message, this.user);
       }
@@ -146,19 +150,14 @@ public class Client {
   public void sendMessage(String message, String recipient) {
     UserModel userDest = usersManager.getModelByUsername(recipient);
     try {
-      JsonObject jsonMessage = new JsonObject();
-      jsonMessage.addProperty("action", "message");
-      jsonMessage.addProperty("sender", user.getUsername());
-      jsonMessage.addProperty("recipient", recipient);
-      jsonMessage.addProperty("message", message);
-
+      JsonObject jsonMessage = userService.createSendMessageData(user.getUsername(), recipient, message);
       byte[] data = jsonMessage.toString().getBytes();
       InetAddress ipAddressDest = InetAddress.getByName(userDest.getIpAddress());
       DatagramPacket packet = new DatagramPacket(
-              data, 
-              data.length, 
-              ipAddressDest, 
-              userDest.getPort()
+        data, 
+        data.length, 
+        ipAddressDest, 
+        userDest.getPort()
       );
 
       socketClient.send(packet);
@@ -176,8 +175,32 @@ public class Client {
    */
   
   public void sendFile(File file, String recipient) {
+    UserModel userDest = usersManager.getModelByUsername(recipient);
     try {
+      JsonObject data = new JsonObject();
+      data.addProperty("action", "file");
+      data.addProperty("sender", user.getUsername());
+      data.addProperty("recipient", recipient);
+      Metadata metadata = Packet.createFileMetadata(file.getName(), file.length(), null);
+      Gson gson = new Gson();
+      String metadataJson = gson.toJson(metadata);
+      
+      data.addProperty("metadata", metadataJson);
+      
+      byte[] bytesData = data.toString().getBytes();
+      InetAddress ipAddressDest = InetAddress.getByName(userDest.getIpAddress());
+      int portDest = userDest.getPort();
+      DatagramPacket packet = new DatagramPacket(
+        bytesData,
+        bytesData.length,
+        ipAddressDest,
+        portDest
+      );
+      
+      socketClient.send(packet);
+      System.out.println("Metadatos del archivo enviado a " + recipient);
     } catch (Exception e) {
+      e.printStackTrace();
     }
   }
   

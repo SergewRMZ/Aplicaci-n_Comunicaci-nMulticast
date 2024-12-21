@@ -35,6 +35,7 @@ public class UnicastListener implements Runnable {
           
           switch (action) {
             case "message" -> handleMessagePrivate(json);
+            case "file" -> handleFile(json);
             default -> throw new AssertionError();
           }
         }
@@ -53,5 +54,9 @@ public class UnicastListener implements Runnable {
     String recipient = json.get("recipient").getAsString();
     String message = json.get("message").getAsString();
     MulticastChat.getInstance().addMessage(sender, recipient, message, false, true);
+  }
+  
+  private void handleFile(JsonObject json) {
+    System.out.println("Handle File");
   }
 }

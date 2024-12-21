@@ -1,5 +1,4 @@
 package file;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -21,9 +20,8 @@ public class FileSender {
   private int windowStart;
   private int windowEnd;
 
-  public FileSender(PacketManager packetManager, DatagramSocket socket) {
+  public FileSender(PacketManager packetManager) {
     this.packetManager = packetManager;
-    this.socket = socket;
     this.ackReceiver = new AckReceiver(socket, packetManager);
     ackReceiver.setFileSender(this);
   }
@@ -31,7 +29,7 @@ public class FileSender {
   public void sendFile (File file) throws IOException {
     try (FileInputStream flujo = new FileInputStream(file)) {
       packetManager.setFile(file);
-      packetManager.sendMetaData(file.getName(), file.length(), null);
+      // packetManager.sendMetaData(file.getName(), file.length(), null);
       
       int bytesRead;
       byte[] buffer = new byte[PACKET_SIZE - HEADER_SIZE];
@@ -43,16 +41,14 @@ public class FileSender {
           while ((windowEnd - windowStart + MAX_SEQUENCE_NUMBER) % MAX_SEQUENCE_NUMBER >= WINDOW_SIZE) {
             try {
               wait();
-            } catch (Exception e) {
+            } catch (InterruptedException e) {
               e.printStackTrace();
             }
           }  
           
           boolean isLastPacket = flujo.available() == 0;
           packetManager.putPacketReference(currentOffset, bytesRead, sequenceNumber);
-          if(sequenceNumber != 3)
           packetManager.sendPacketData(buffer, sequenceNumber, isLastPacket);
-          
           currentOffset += bytesRead;
           sequenceNumber = (sequenceNumber + 1) % this.MAX_SEQUENCE_NUMBER;
           windowEnd = (windowEnd + 1) % this.MAX_SEQUENCE_NUMBER;

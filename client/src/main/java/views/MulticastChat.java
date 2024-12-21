@@ -8,6 +8,7 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,10 +16,13 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import model.UserModel;
 import utils.AppColors;
+import utils.FontAwesomeIcons;
 
 public class MulticastChat extends javax.swing.JFrame {
   private static MulticastChat instance;
@@ -140,7 +144,6 @@ public class MulticastChat extends javax.swing.JFrame {
     usernameLabel.setForeground(AppColors.getGRAY_COLOR());
     usernameLabel.setBackground(AppColors.getWHITE_COLOR());
     
-    // Crear etiqueta para el mensaje
     JLabel messageLabel = new JLabel(message);
     messageLabel.setFont(new Font("Lucida Sans", Font.PLAIN, 16));
     messageLabel.setForeground(AppColors.getWHITE_COLOR());
@@ -244,6 +247,9 @@ public class MulticastChat extends javax.swing.JFrame {
     userInfoComponent = new components.UserInfoComponent();
     ContainerMessage = new javax.swing.JPanel();
     textFieldMessage = new PlaceholderTextField("Escribe un mensaje...");
+    fileBtn = new javax.swing.JButton();
+    emojiBtn = new javax.swing.JButton();
+    sendBtn = new javax.swing.JButton();
     welcomePanel = new javax.swing.JPanel();
     labelDestLabel = new javax.swing.JLabel();
     ScrollPane = new javax.swing.JScrollPane();
@@ -325,9 +331,33 @@ public class MulticastChat extends javax.swing.JFrame {
         textFieldMessageActionPerformed(evt);
       }
     });
-    ContainerMessage.add(textFieldMessage, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 10, 630, 40));
+    ContainerMessage.add(textFieldMessage, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 10, 650, 40));
 
-    PanelChat.add(ContainerMessage, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 630, 770, 60));
+    fileBtn.setIcon(FontAwesomeIcons.fileIcon(25));
+    fileBtn.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        fileBtnActionPerformed(evt);
+      }
+    });
+    ContainerMessage.add(fileBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 10, 40, 40));
+
+    emojiBtn.setIcon(FontAwesomeIcons.emojiIcon(25));
+    emojiBtn.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        emojiBtnActionPerformed(evt);
+      }
+    });
+    ContainerMessage.add(emojiBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 40, 40));
+
+    sendBtn.setIcon(FontAwesomeIcons.sendIcon(25));
+    sendBtn.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        sendBtnActionPerformed(evt);
+      }
+    });
+    ContainerMessage.add(sendBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(790, 10, 40, 40));
+
+    PanelChat.add(ContainerMessage, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 630, 840, 60));
 
     welcomePanel.setBackground(AppColors.getBLUE_COLOR());
 
@@ -398,6 +428,30 @@ public class MulticastChat extends javax.swing.JFrame {
     openChat("ChatGrupal");
   }//GEN-LAST:event_btnGroupChatActionPerformed
 
+  private void fileBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileBtnActionPerformed
+    JFileChooser fileChooser = new JFileChooser();
+    fileChooser.setDialogTitle("Selecciona un archivo para enviar");
+    
+    int result = fileChooser.showOpenDialog(this);
+    if(result == JFileChooser.APPROVE_OPTION) {
+      File selectedFile = fileChooser.getSelectedFile();
+      JOptionPane.showMessageDialog(this, "Archivo seleccionado " + selectedFile.getAbsolutePath());
+      Client.getInstanceClient().sendFile(selectedFile, selectedUser);
+    }
+
+    else {
+      JOptionPane.showMessageDialog(this, "No se seleccionó ningún archivo");
+    }
+  }//GEN-LAST:event_fileBtnActionPerformed
+
+  private void emojiBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_emojiBtnActionPerformed
+    // TODO add your handling code here:
+  }//GEN-LAST:event_emojiBtnActionPerformed
+
+  private void sendBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendBtnActionPerformed
+    
+  }//GEN-LAST:event_sendBtnActionPerformed
+
   /**
    * @param args the command line arguments
    */
@@ -441,11 +495,14 @@ public class MulticastChat extends javax.swing.JFrame {
   private javax.swing.JPanel PanelLateral;
   private javax.swing.JScrollPane ScrollPane;
   private javax.swing.JButton btnGroupChat;
+  private javax.swing.JButton emojiBtn;
+  private javax.swing.JButton fileBtn;
   private javax.swing.JLabel labelDestLabel;
   private javax.swing.JLabel labelImg;
   private javax.swing.JPanel pane;
   private javax.swing.JPanel paneFriends;
   private javax.swing.JScrollPane scrollPaneFriends;
+  private javax.swing.JButton sendBtn;
   private javax.swing.JTextField textFieldMessage;
   private components.UserInfoComponent userInfoComponent;
   private javax.swing.JPanel welcomePanel;

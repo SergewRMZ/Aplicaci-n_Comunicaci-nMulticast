@@ -69,6 +69,11 @@ public class Packet {
     return packetMetadata;
   }
   
+  public static Metadata createFileMetadata (String filename, long filesize, String fileparent) {
+    int totalPackets = calculatePackets(filesize);
+    return new Metadata(filename, fileparent, generateFileID(filename), filesize, totalPackets);
+  }
+  
   /**
    * Método para procesar los metadatos del archivo.
    * @param packet Recibe un objeto DatagramPacket que contiene la información del cliente.

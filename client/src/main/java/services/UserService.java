@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import dto.ResponseDto;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import model.UserModel;
@@ -56,6 +57,14 @@ public class UserService {
     return data;
   }
   
+  /**
+   * Método que recibe un JSON con los datos de la petición de obtener usuarios. Se encarga
+   * de deserializar la respuesta para obtener cada uno de los usuarios en linea e irlos agregando
+   * a la lista de usuarios conectados.
+   * @param response JSON que contiene la lista de usuarios conectados.
+   * @param usersManager Objecto encargado de gestionar la lista de usuarios conectados.
+   * @return Lista de usuarios conectados.
+   */
   public List<String> getUsersOnlineList(JsonObject response, UsersManager usersManager) {
     List<String> usersOnline = new ArrayList<>();
     
@@ -86,5 +95,44 @@ public class UserService {
     }
     
     return null;
+  }
+  
+  /**
+   * Método para crear el objeto JSON para realizar la request de enviar un mensaje
+   * a un usuario destinatario.
+   * @param sender Usuario que envia el mensaje.
+   * @param recipient Usuario que recibirá el mensaje.
+   * @param message Mensaje que se enviará.
+   * @return 
+   */
+  public JsonObject createSendMessageData(String sender, String recipient, String message) {
+    JsonObject jsonMessage = new JsonObject();
+    jsonMessage.addProperty("action", "message");
+    jsonMessage.addProperty("sender", sender);
+    jsonMessage.addProperty("recipient", recipient);
+    jsonMessage.addProperty("message", message);
+    return jsonMessage;
+  }
+  
+  
+  /**
+   * Método para crear el directorio de un usuario de la aplicación.
+   * @param username Nombre de usuario.
+   */
+  public void createUserDirectory(String username) {
+    File directory = new File("usuarios/" + username);
+    if(!directory.exists()) {
+      if(directory.mkdirs()) {
+        System.out.println("Carpeta creada para el usuario: " + username);
+      }
+      
+      else {
+        System.err.println("Error al crear la carpeta de usuario: " + username);
+      }
+    }
+    
+    else {
+      System.out.println("La carpeta para el usuario " + username + " ya existe");
+    }
   }
 }
