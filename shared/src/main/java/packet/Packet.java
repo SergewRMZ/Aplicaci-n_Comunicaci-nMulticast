@@ -1,7 +1,6 @@
 package packet;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import dto.Metadata;
 import java.math.BigInteger;
 import java.net.DatagramPacket;
@@ -57,40 +56,10 @@ public class Packet {
     return (int) Math.ceil((double) fileSize / (PACKET_SIZE - HEADER_SIZE));
   }
   
-  public static byte [] createMetadata (String filename, long filesize, String fileparent) {
-    int totalPackets = calculatePackets(filesize);
-    metadata = new Metadata(filename, fileparent, generateFileID(filename), filesize, totalPackets);
-    byte controlByte = createControlByte(false, false, true, 0);
-    byte[] metadataBytes = gson.toJson(metadata).getBytes();
-    byte[] packetMetadata = new byte[metadataBytes.length + 1];
-    packetMetadata[0] = controlByte;
-    
-    System.arraycopy(metadataBytes, 0, packetMetadata, 1, metadataBytes.length);
-    return packetMetadata;
-  }
-  
   public static Metadata createFileMetadata (String filename, long filesize, String fileparent) {
     int totalPackets = calculatePackets(filesize);
-    return new Metadata(filename, fileparent, generateFileID(filename), filesize, totalPackets);
-  }
-  
-  /**
-   * Método para procesar los metadatos del archivo.
-   * @param packet Recibe un objeto DatagramPacket que contiene la información del cliente.
-   * @return Si el paquete de metadatos es correcto, es retornado al PacketManager
-   */
-  public static Metadata processMetadata (DatagramPacket packet) {
-    byte[] jsonData = Arrays.copyOfRange(packet.getData(), 1, packet.getLength());
-    String jsonString = new String(jsonData).trim();
-    try {
-      Metadata metadata = gson.fromJson(jsonString, Metadata.class);
-      System.out.println(metadata.toString());
-      return metadata;
-    } catch (JsonSyntaxException e) {
-      System.err.println("Error de deserialización de JSON: " + e.getMessage());
-    }
-    
-    return null;
+    metadata = new Metadata(filename, fileparent, generateFileID(filename), filesize, totalPackets);
+    return metadata;
   }
   
   public static PacketInfo processData (DatagramPacket packet) {

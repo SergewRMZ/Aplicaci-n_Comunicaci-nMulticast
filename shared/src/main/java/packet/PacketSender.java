@@ -6,18 +6,19 @@ import java.net.InetAddress;
 
 public class PacketSender { 
   private final DatagramSocket socket;
-  private final InetAddress serverAddress;
-  private final int port;
+  private final InetAddress destAddress;
+  private final int destPort;
   
-  public PacketSender (DatagramSocket socket, InetAddress serverAddress, int port) {
-    this.port = port;
+  public PacketSender (DatagramSocket socket, InetAddress destAddress, int destPort) {
+    this.destPort = destPort;
     this.socket = socket;
-    this.serverAddress = serverAddress;
+    this.destAddress = destAddress;
   }
   
   public void sendPacket (byte [] data) {
     try { 
-      DatagramPacket packet = new DatagramPacket(data, data.length, this.serverAddress, this.port);
+      System.out.println("Enviando paquete de datos");
+      DatagramPacket packet = new DatagramPacket(data, data.length, this.destAddress, this.destPort);
       socket.send(packet);
     } catch (Exception e) {
       e.printStackTrace();

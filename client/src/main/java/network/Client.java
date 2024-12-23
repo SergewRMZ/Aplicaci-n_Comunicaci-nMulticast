@@ -5,8 +5,12 @@ import com.google.gson.JsonParser;
 import dto.ChatRoomDto;
 import dto.Metadata;
 import dto.ResponseDto;
+import file.FileAssembler;
+import file.FileSender;
 import java.io.File;
+import java.io.FileInputStream;
 import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.ArrayList;
@@ -15,6 +19,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import model.UserModel;
 import packet.Packet;
+import packet.PacketManager;
+import packet.PacketSender;
 import services.UserService;
 import threads.MulticastListener;
 import threads.UnicastListener;
@@ -26,15 +32,17 @@ public class Client {
   private MulticastSocket socketClient;
   private InetAddress serverAddress;
   
+  // Datos de red del usuario
   String localIpAddress;
   int localPort;
   
-  // Datos del Usuario
+  // Información del Usuario
   private UserModel user;
  
   // Servicios
   UsersManager usersManager;
   UserService userService;
+  FileAssembler fileAssembler;
   
   // ALBERCA DE HILOS
   private ExecutorService threadPool;
@@ -63,6 +71,7 @@ public class Client {
       socketClient = new MulticastSocket();
       socketClient.setLoopbackMode(false);
       socketClient.setTimeToLive(255);
+      socketClient.setReceiveBufferSize(1024 * 16);
       serverAddress = InetAddress.getByName(SERVER_HOST);
       localIpAddress = InetAddress.getLocalHost().getHostAddress();
       localPort = socketClient.getLocalPort();
@@ -177,6 +186,7 @@ public class Client {
   public void sendFile(File file, String recipient) {
     UserModel userDest = usersManager.getModelByUsername(recipient);
     try {
+      DatagramSocket fileSocket = new DatagramSocket();
       JsonObject data = new JsonObject();
       data.addProperty("action", "file");
       data.addProperty("sender", user.getUsername());
@@ -197,7 +207,16 @@ public class Client {
         portDest
       );
       
-      socketClient.send(packet);
+      fileSocket.send(packet);
+      System.out.println("Metadatados enviados");
+      
+      PacketManager packetManager = new PacketManager(this.fileAssembler);
+      PacketSender packetSender = new PacketSender(fileSocket, ipAddressDest, portDest);
+      packetManager.setPacketSender(packetSender);
+      
+      FileSender fileSender = new FileSender(packetManager, fileSocket);
+      fileSender.sendFile(file);
+      
       System.out.println("Metadatos del archivo enviado a " + recipient);
     } catch (Exception e) {
       e.printStackTrace();
@@ -215,7 +234,8 @@ public class Client {
   }
   
   public void listenUnicast() {
-    this.threadPool.submit(new UnicastListener(socketClient));
+    this.fileAssembler = new FileAssembler("usuarios/" + this.user.getUsername());
+    this.threadPool.submit(new UnicastListener(socketClient, fileAssembler));
   }
   
   public List<String> getUsersOnline() {

@@ -10,6 +10,7 @@ public class Test {
     Client client = Client.getInstanceClient();
     client.loginUser("Axel", "1234");
     client.getUserGroup();
+    client.listenUnicast();
     
     Scanner scanner = new Scanner(System.in);
     while (true) {      

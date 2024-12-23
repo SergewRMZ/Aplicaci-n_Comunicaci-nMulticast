@@ -1,1 +1,4 @@
 /shared/target/
+/client/usuarios/
+/client/target/
+/server/target/

@@ -1,5 +1,6 @@
 package packet;
 
+import com.google.gson.JsonObject;
 import file.FileAssembler;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -33,7 +34,7 @@ public class PacketManager {
     this.file = file;
   }
   
-  private void showPacket (byte [] data) {
+  public void showPacket (byte [] data) {
     for (int i = 0; i < data.length; i++) {
       System.out.printf("%02x ", data[i]);
       if ((i + 1) % 16 == 0) {
@@ -44,15 +45,10 @@ public class PacketManager {
     System.out.println("Cantidad de datos: " + data.length);
   }
   
-  public void sendMetaData (String filename, long filesize, String fileparent) {
-    byte[] metadataPacket = Packet.createMetadata(filename, filesize, fileparent);
-    packetSender.sendPacket(metadataPacket);
-  }
-  
   public void sendPacketData (byte[] data, int sequenceNumber, boolean isLastPacket) {
     byte[] packet = Packet.createPacketData(isLastPacket, packetCounter, sequenceNumber, data);
-    System.out.println("Enviando paquete: " + sequenceNumber);
-    this.packetSender.sendPacket(packet);
+    packetSender.sendPacket(packet);
+    System.out.println("Paquete " + sequenceNumber + " enviado");
     packetCounter++;
   }
   
@@ -72,23 +68,7 @@ public class PacketManager {
       e.printStackTrace();
     }
   }
-  
-  public void processMetadataPacket (DatagramPacket packet) {
-    Metadata metadata = Packet.processMetadata(packet);
-    if (metadata != null) {
-      try {
-        this.fileAssembler.initializeFile(metadata);
-      } catch (IOException e) {
-        System.err.println("Error al inicializar archivo: " + e.getMessage());
-        e.printStackTrace();
-      }
-    }
-    
-    else {
-      System.err.println("No se pudo procesar el paquete de metadatos");
-    }
-  }
-  
+ 
   public void processPacketData (DatagramPacket packet) {
     PacketInfo packetInfo = Packet.processData(packet);
     System.out.println(packetInfo.toString());
@@ -120,7 +100,6 @@ public class PacketManager {
   }
   
   public PacketReferences getPacketByIndex (int index) {
-    System.out.println("Indice a obtener: " + index);
     return listPackets.get(index);
   }
   
@@ -137,9 +116,5 @@ public class PacketManager {
         System.out.println("Indice: " + i + " - " + "null");
       }
     }
-  }
-  
-  public void sendFileList(byte [] data) {
-    packetSender.sendPacket(data);
   }
 }

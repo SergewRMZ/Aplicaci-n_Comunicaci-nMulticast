@@ -20,8 +20,9 @@ public class FileSender {
   private int windowStart;
   private int windowEnd;
 
-  public FileSender(PacketManager packetManager) {
+  public FileSender(PacketManager packetManager, DatagramSocket socket) {
     this.packetManager = packetManager;
+    this.socket = socket;
     this.ackReceiver = new AckReceiver(socket, packetManager);
     ackReceiver.setFileSender(this);
   }
@@ -29,7 +30,6 @@ public class FileSender {
   public void sendFile (File file) throws IOException {
     try (FileInputStream flujo = new FileInputStream(file)) {
       packetManager.setFile(file);
-      // packetManager.sendMetaData(file.getName(), file.length(), null);
       
       int bytesRead;
       byte[] buffer = new byte[PACKET_SIZE - HEADER_SIZE];

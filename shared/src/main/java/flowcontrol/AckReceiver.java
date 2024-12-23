@@ -48,11 +48,13 @@ public class AckReceiver implements Runnable {
             ackReceived[ackNumber] = true;
             packetManager.removePacketReferenceByIndex(ackNumber);
             
+            // Se verifica si el número de acuse recibido es al que apunta el fileSender, de ser así se avanza
             while (ackReceived[fileSender.getWindowStart()]) {
               ackReceived[fileSender.getWindowStart()] = false;
               int ws = (fileSender.getWindowStart() + 1) % MAX_SEQUENCE_NUMBER;
               fileSender.updateWindowStart(ws);
             }
+            
             fileSender.notify();
           }
         }

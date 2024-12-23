@@ -9,7 +9,7 @@ public class Metadata {
   /**
    * Constructor para representar un objeto que contenga información del archivo.
    * @param filename: Nombre del archivo
-   * @param filepath: Nombre padre del archivo
+   * @param fileparent: Nombre padre del archivo
    * @param filesize: Tamaño del archivo
    * @param fileID: ID de Archivo en bytes.
    * @param totalPackets: Número total de paquetes.
