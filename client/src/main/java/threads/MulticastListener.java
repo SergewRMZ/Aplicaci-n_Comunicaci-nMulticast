@@ -43,7 +43,7 @@ public class MulticastListener implements Runnable {
         
         if(localPort == packet.getPort()) continue;
         
-        System.out.println("Mensaje recibido: " + new String(packet.getData(), 0, packet.getLength()));
+        System.out.println("Mensaje recibido en multicast: " + new String(packet.getData(), 0, packet.getLength()));
         String message = new String(packet.getData(), 0, packet.getLength());
         JsonObject json = JsonParser.parseString(message).getAsJsonObject();
         

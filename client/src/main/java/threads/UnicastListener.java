@@ -75,14 +75,21 @@ public class UnicastListener implements Runnable {
     MulticastChat.getInstance().addMessage(sender, recipient, message, false, true);
   }
   
+  /**
+   * Método para procesar los metadatos de un archivo, recibe un paquete de datos
+   * del cual extrae la dirección, puerto del emisor del archivo y los metadatos
+   * con los cuales inicializar el archivo y el handshake.
+   * @param json
+   * @param packet 
+   */
   private void handleFile(JsonObject json, DatagramPacket packet) {
-    System.out.println("Estableciendo handshake con " + packet.getAddress());
-    
     // Establecer dirección y puerto de usuario que envia el archivo, para el envio de acuses
     if(selectiveRejectManager.getClientAddress() == null) {
       selectiveRejectManager.setClientInfo(packet.getAddress(), packet.getPort());
     }
     
+    String sender = json.get("sender").getAsString();
+    String recipient = json.get("recipient").getAsString();
     String metadataJson = json.get("metadata").getAsString();
     Gson gson = new Gson();
     Metadata metadata = gson.fromJson(metadataJson, Metadata.class);
@@ -94,8 +101,17 @@ public class UnicastListener implements Runnable {
         e.printStackTrace();
       }
     }
+    
+    String path = "usuarios/" + recipient + "/" + metadata.getFileName();
+    String filesize = Long.toString(metadata.getFileSize());
+    MulticastChat.getInstance().addFileMessage(sender, recipient, path, metadata.getFileName(), filesize, false);
   } 
   
+  /**
+   * Método para recibir los paquetes de un archivo. Recibe el paquete
+   * y posteriormente se procesa con el método de rechazo selectivo.
+   * @param packet Paquete que contiene los datos.
+   */
   private void handlePacketFile(DatagramPacket packet) {
     int sequenceNumber = Packet.verifyPacket(packet.getData());
     if(sequenceNumber != -1) {

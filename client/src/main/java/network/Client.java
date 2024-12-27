@@ -158,6 +158,7 @@ public class Client {
    */
   public void sendMessage(String message, String recipient) {
     UserModel userDest = usersManager.getModelByUsername(recipient);
+    System.out.println("Enviando mensaje a " + userDest.getUsername() + userDest.getPort());
     try {
       JsonObject jsonMessage = userService.createSendMessageData(user.getUsername(), recipient, message);
       byte[] data = jsonMessage.toString().getBytes();
@@ -170,7 +171,6 @@ public class Client {
       );
 
       socketClient.send(packet);
-      System.out.println("Mensaje enviado a " + recipient);
     } catch (Exception e) {
       System.err.println("Error al enviar el mensaje privado");
       e.printStackTrace();
@@ -216,8 +216,8 @@ public class Client {
       
       FileSender fileSender = new FileSender(packetManager, fileSocket);
       fileSender.sendFile(file);
-      
-      System.out.println("Metadatos del archivo enviado a " + recipient);
+      fileSocket.close();
+      System.out.println("Archivo enviado a " + recipient);
     } catch (Exception e) {
       e.printStackTrace();
     }

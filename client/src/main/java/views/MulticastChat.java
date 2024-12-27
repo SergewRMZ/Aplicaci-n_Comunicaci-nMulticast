@@ -1,12 +1,10 @@
 package views;
 
 import components.BtnFriend;
+import components.FileComponent;
 import components.ImageLabel;
 import components.PlaceholderTextField;
 import network.Client;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.io.File;
 import java.util.HashMap;
@@ -80,6 +78,10 @@ public class MulticastChat extends javax.swing.JFrame {
     this.userInfoComponent.setUsernameLabel(userModel.getUsername());
   }
   
+  /**
+   * Método para remover a un usuario de la interfaz.
+   * @param username 
+   */
   public void removeUser(String username) {
     int index = getIndexOfBtnFriend(username);
     if(index != -1) {
@@ -169,6 +171,33 @@ public class MulticastChat extends javax.swing.JFrame {
     return messagePanel;
   }
   
+  public void addFileMessage(String username, String recipient, String path, String filename, String filesize, boolean isSender) {
+    FileComponent fileComponent = new FileComponent(filename, filesize, username, path);
+    String paneToSearch;
+    
+    if(isSender) paneToSearch = username;
+    else paneToSearch = recipient;
+    
+    int index = getIndexOfBtnFriend(paneToSearch);
+    JPanel chatPanel = chats.computeIfAbsent(paneToSearch, k -> {
+      JPanel panel = new JPanel();
+      panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+      return panel;
+    });
+    
+    if(recipient.equals(selectedUser) || username.equals(selectedUser)) {
+      pane.add(fileComponent);
+      pane.add(Box.createVerticalStrut(10));
+      pane.revalidate();
+      pane.repaint();
+    }
+    
+    else { 
+      chatPanel.add(fileComponent);
+      chatPanel.add(Box.createVerticalStrut(10));
+    }
+  }
+  
   /**
    * Este método inserta un mensaje en la interfaz gráfica.
    * @param username Nombre de usuario que envió el mensaje.
@@ -182,6 +211,7 @@ public class MulticastChat extends javax.swing.JFrame {
     String paneToSearch;
     int index;
     
+    // Si es un mensaje privado, se inserta en el panel del que envió el mensaje.
     if(isPrivate) {
       paneToSearch = username;
       index = getIndexOfBtnFriend(username);
@@ -192,12 +222,14 @@ public class MulticastChat extends javax.swing.JFrame {
       index = getIndexOfBtnFriend(recipient);
     }
     
+    System.out.println("Insertando mensaje en el panel de " + paneToSearch);
     JPanel chatPanel = chats.computeIfAbsent(paneToSearch, k -> {
       JPanel panel = new JPanel();
       panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
       return panel;
     });
     
+    // Si el destinatario es el del panel actual, se agrega el mensaje en el panel actual
     if(recipient.equals(selectedUser) || username.equals(selectedUser)) {
       pane.add(messagePanel);
       pane.add(Box.createVerticalStrut(10));
@@ -364,7 +396,7 @@ public class MulticastChat extends javax.swing.JFrame {
     labelDestLabel.setFont(new java.awt.Font("Lucida Sans", 1, 18)); // NOI18N
     labelDestLabel.setForeground(new java.awt.Color(255, 255, 255));
     labelDestLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    labelDestLabel.setText("Chat Grupal");
+    labelDestLabel.setText("ChatGrupal");
 
     javax.swing.GroupLayout welcomePanelLayout = new javax.swing.GroupLayout(welcomePanel);
     welcomePanel.setLayout(welcomePanelLayout);
@@ -435,7 +467,13 @@ public class MulticastChat extends javax.swing.JFrame {
     int result = fileChooser.showOpenDialog(this);
     if(result == JFileChooser.APPROVE_OPTION) {
       File selectedFile = fileChooser.getSelectedFile();
+      long fileSizeBytes = selectedFile.length(); // Obtiene el tamaño en bytes
+      double fileSizeMB = fileSizeBytes / (1024.0 * 1024.0); // Convierte a MB
+        
+      String formattedSize = String.format("%.2f MB", fileSizeMB);
       JOptionPane.showMessageDialog(this, "Archivo seleccionado " + selectedFile.getAbsolutePath());
+      addFileMessage(userModel.getUsername(), selectedUser, selectedFile.getPath(), selectedFile.getName(), formattedSize, true);
+
       Client.getInstanceClient().sendFile(selectedFile, selectedUser);
     }
 

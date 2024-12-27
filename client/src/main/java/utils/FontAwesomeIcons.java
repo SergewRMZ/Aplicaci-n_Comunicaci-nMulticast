@@ -28,7 +28,6 @@ public class FontAwesomeIcons {
     icon.setIconColor(AppColors.SECONDARY_COLOR);
     return icon;
   }
-  
   public static Icon sendIcon(int size) {
     FontIcon icon = FontIcon.of(FontAwesomeSolid.PAPER_PLANE, size);
     icon.setIconColor(AppColors.getBLUE_LIGHT_COLOR());
