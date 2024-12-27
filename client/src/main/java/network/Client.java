@@ -208,7 +208,6 @@ public class Client {
       );
       
       fileSocket.send(packet);
-      System.out.println("Metadatados enviados");
       
       PacketManager packetManager = new PacketManager(this.fileAssembler);
       PacketSender packetSender = new PacketSender(fileSocket, ipAddressDest, portDest);

@@ -177,7 +177,6 @@ public class MulticastChat extends javax.swing.JFrame {
     
     if(isSender) paneToSearch = username;
     else paneToSearch = recipient;
-    
     int index = getIndexOfBtnFriend(paneToSearch);
     JPanel chatPanel = chats.computeIfAbsent(paneToSearch, k -> {
       JPanel panel = new JPanel();
@@ -195,6 +194,9 @@ public class MulticastChat extends javax.swing.JFrame {
     else { 
       chatPanel.add(fileComponent);
       chatPanel.add(Box.createVerticalStrut(10));
+      chatPanel.revalidate();
+      chatPanel.repaint();
+      increaseMessageNotification(index);
     }
   }
   
@@ -222,7 +224,6 @@ public class MulticastChat extends javax.swing.JFrame {
       index = getIndexOfBtnFriend(recipient);
     }
     
-    System.out.println("Insertando mensaje en el panel de " + paneToSearch);
     JPanel chatPanel = chats.computeIfAbsent(paneToSearch, k -> {
       JPanel panel = new JPanel();
       panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -475,6 +476,7 @@ public class MulticastChat extends javax.swing.JFrame {
       addFileMessage(userModel.getUsername(), selectedUser, selectedFile.getPath(), selectedFile.getName(), formattedSize, true);
 
       Client.getInstanceClient().sendFile(selectedFile, selectedUser);
+      JOptionPane.showMessageDialog(this, "Archivo enviado correctamente a " + selectedUser);
     }
 
     else {
