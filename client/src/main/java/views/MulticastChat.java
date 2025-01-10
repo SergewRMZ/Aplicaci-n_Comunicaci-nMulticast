@@ -1,5 +1,4 @@
 package views;
-
 import components.BtnFriend;
 import components.FileComponent;
 import components.ImageLabel;
@@ -21,11 +20,30 @@ import javax.swing.JPanel;
 import model.UserModel;
 import utils.AppColors;
 import utils.FontAwesomeIcons;
+import components.Gif;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+
 
 public class MulticastChat extends javax.swing.JFrame {
   private static MulticastChat instance;
   private UserModel userModel;
   private final String PATH_IMG_LABEL = "/logo.png";
+  Gif loveGif = new Gif("/love.gif", "loveGif");
+  Gif pensarGif = new Gif("/pensar.gif", "pensarGif");
+  Gif siGif = new Gif("/si.gif", "siGif");
+  Gif noGif = new Gif("/no.gif", "noGif");
+  Gif risaGif = new Gif("/risa.gif", "risaGif");
+  Gif pinguGif = new Gif("/pingu.gif", "pinguGif");
+  Gif treeGif = new Gif("/tree.gif", "treeGif");
+  Gif chrisGif = new Gif("/navida.gif", "chrisGif");
+  Gif renoGif = new Gif("/reno.png", "renoGif");
+
+  
+  private void setImageId(JLabel label, String id) {
+    label.setName(id);
+}
   
   private Map<String, JPanel> chats = new HashMap<>();
   private String selectedUser = null;
@@ -37,8 +55,32 @@ public class MulticastChat extends javax.swing.JFrame {
     pane.setLayout(new BoxLayout(pane, BoxLayout.Y_AXIS)); // Panel de grupo
     paneFriends.setLayout(new BoxLayout(paneFriends, BoxLayout.Y_AXIS));
     openChat("ChatGrupal");
-  }
+    emojisPanel.setVisible(false);
+    initializeGifListeners();
+    
+    // Asignar los íconos e IDs
+    setImageId(love, loveGif.getId());
+    setImageId(pensar, pensarGif.getId());
+    setImageId(si, siGif.getId());
+    setImageId(no, noGif.getId());
+    setImageId(risa, risaGif.getId());
+    setImageId(pingu, pinguGif.getId());
+    setImageId(tree, treeGif.getId());
+    setImageId(chris, chrisGif.getId());
+    setImageId(reno, renoGif.getId());
+
+    love.setIcon(loveGif.getIcon());
+    pensar.setIcon(pensarGif.getIcon());
+    si.setIcon(siGif.getIcon());
+    no.setIcon(noGif.getIcon());
+    risa.setIcon(risaGif.getIcon());
+    pingu.setIcon(pinguGif.getIcon());
+    tree.setIcon(treeGif.getIcon());
+    chris.setIcon(chrisGif.getIcon());
+    reno.setIcon(renoGif.getIcon());
+    
   
+  }
   /**
    * Patrón singleton para obtener una única instancia de MulticastChat
    * @return MulticastChat
@@ -208,10 +250,36 @@ public class MulticastChat extends javax.swing.JFrame {
    * @param alignRight Alinear dependiendo el tipo de mensaje.
    * @param isPrivate True si el mensaje a insertar en la interfaz es un mensaje privado.
    */
+  
   public void addMessage(String username, String recipient, String message, boolean alignRight, boolean isPrivate) {
     JPanel messagePanel = createMessage(username, message, alignRight);
     String paneToSearch;
     int index;
+    
+    // Si el mensaje es un ID de GIF y se reemplaza por el GIF
+    JLabel gifLabel = SearchID(message);
+    if (gifLabel != null) {
+        messagePanel = new JPanel();
+        messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.Y_AXIS));
+        messagePanel.setOpaque(true);
+        messagePanel.setBackground(AppColors.getGRAY_LIGHT_COLOR());
+
+        // Nombre del que envía el mensaje
+        JLabel senderLabel = new JLabel(username);
+        senderLabel.setFont(new Font("Lucida Sans", Font.PLAIN, 16));
+        senderLabel.setForeground(AppColors.getBLACK_COLOR());
+        
+        if (alignRight) {
+            gifLabel.setHorizontalAlignment(JLabel.RIGHT);
+            senderLabel.setHorizontalAlignment(JLabel.RIGHT);
+        }
+        
+        messagePanel.add(senderLabel);
+        messagePanel.add(Box.createVerticalStrut(5));
+        messagePanel.add(gifLabel);
+    } else {
+        messagePanel = createMessage(username, message, alignRight); 
+    }
     
     // Si es un mensaje privado, se inserta en el panel del que envió el mensaje.
     if(isPrivate) {
@@ -244,6 +312,7 @@ public class MulticastChat extends javax.swing.JFrame {
       increaseMessageNotification(index);
     }
   }
+
   
   private void increaseMessageNotification(int index) {
     BtnFriend component = (BtnFriend) paneFriends.getComponent(index);
@@ -259,6 +328,63 @@ public class MulticastChat extends javax.swing.JFrame {
     paneFriends.repaint();
   }
   
+
+  private void initializeGifListeners() {
+    JLabel[] gifLabels = {love, pensar, si, no, risa, pingu, tree, chris, reno};
+    
+    for (JLabel gifLabel : gifLabels) {
+        gifLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                String gifId = gifLabel.getName();
+                if (gifId != null && !gifId.isEmpty()) {
+                    sendGifMessage(gifId);
+                }
+            }
+        });
+    }
+}
+
+private void sendGifMessage(String gifId) {
+    if (selectedUser == null) {
+        JOptionPane.showMessageDialog(this, "Por favor, selecciona un usuario antes de enviar un GIF.", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+    
+    Client client = Client.getInstanceClient();
+    if (client != null) {
+        client.sendMessage(gifId, selectedUser);
+        addMessage(userModel.getUsername(), selectedUser, gifId, true, false); // Agregar mensaje al panel
+    } else {
+        JOptionPane.showMessageDialog(this, "No se pudo enviar el mensaje. Verifica la conexión con el servidor.", "Error", JOptionPane.ERROR_MESSAGE);
+    }
+}
+
+private JLabel SearchID(String gifId) {
+    // Relacionar IDs con GIFs
+    Map<String, Gif> gifMap = Map.of(
+        loveGif.getId(), loveGif,
+        pensarGif.getId(), pensarGif,
+        siGif.getId(), siGif,
+        noGif.getId(), noGif,
+        risaGif.getId(), risaGif,
+        pinguGif.getId(), pinguGif,
+        treeGif.getId(), treeGif,
+        chrisGif.getId(), chrisGif,
+        renoGif.getId(), renoGif
+    );
+
+    // Buscar si el ID es de un GIF
+    Gif gif = gifMap.get(gifId);
+    if (gif != null) {
+        JLabel gifLabel = new JLabel();
+        gifLabel.setIcon(gif.getIcon());
+        return gifLabel;
+    }
+
+    return null;
+}
+
   
   /**
    * This method is called from within the constructor to initialize the form.
@@ -266,180 +392,261 @@ public class MulticastChat extends javax.swing.JFrame {
    * regenerated by the Form Editor.
    */
   @SuppressWarnings("unchecked")
-  // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-  private void initComponents() {
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
 
-    PanelChat = new javax.swing.JPanel();
-    PanelLateral = new javax.swing.JPanel();
-    LabelUsers = new javax.swing.JLabel();
-    labelImg = new ImageLabel(PATH_IMG_LABEL);
-    BtnLogout = new javax.swing.JButton();
-    scrollPaneFriends = new javax.swing.JScrollPane();
-    paneFriends = new javax.swing.JPanel();
-    btnGroupChat = new javax.swing.JButton();
-    userInfoComponent = new components.UserInfoComponent();
-    ContainerMessage = new javax.swing.JPanel();
-    textFieldMessage = new PlaceholderTextField("Escribe un mensaje...");
-    fileBtn = new javax.swing.JButton();
-    emojiBtn = new javax.swing.JButton();
-    sendBtn = new javax.swing.JButton();
-    welcomePanel = new javax.swing.JPanel();
-    labelDestLabel = new javax.swing.JLabel();
-    ScrollPane = new javax.swing.JScrollPane();
-    pane = new javax.swing.JPanel();
+        PanelChat = new javax.swing.JPanel();
+        emojisPanel = new javax.swing.JPanel();
+        love = new javax.swing.JLabel();
+        pensar = new javax.swing.JLabel();
+        chris = new javax.swing.JLabel();
+        no = new javax.swing.JLabel();
+        pingu = new javax.swing.JLabel();
+        reno = new javax.swing.JLabel();
+        risa = new javax.swing.JLabel();
+        si = new javax.swing.JLabel();
+        tree = new javax.swing.JLabel();
+        PanelLateral = new javax.swing.JPanel();
+        LabelUsers = new javax.swing.JLabel();
+        labelImg = new ImageLabel(PATH_IMG_LABEL);
+        BtnLogout = new javax.swing.JButton();
+        scrollPaneFriends = new javax.swing.JScrollPane();
+        paneFriends = new javax.swing.JPanel();
+        btnGroupChat = new javax.swing.JButton();
+        userInfoComponent = new components.UserInfoComponent();
+        ContainerMessage = new javax.swing.JPanel();
+        textFieldMessage = new PlaceholderTextField("Escribe un mensaje...");
+        fileBtn = new javax.swing.JButton();
+        emojiBtn = new javax.swing.JButton();
+        sendBtn = new javax.swing.JButton();
+        welcomePanel = new javax.swing.JPanel();
+        labelDestLabel = new javax.swing.JLabel();
+        ScrollPane = new javax.swing.JScrollPane();
+        pane = new javax.swing.JPanel();
 
-    setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-    PanelChat.setBackground(new java.awt.Color(236, 236, 236));
-    PanelChat.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        PanelChat.setBackground(new java.awt.Color(236, 236, 236));
+        PanelChat.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-    PanelLateral.setBackground(AppColors.getPRIMARY_COLOR());
-    PanelLateral.setBackground(new java.awt.Color(204, 0, 51));
-    PanelLateral.setForeground(new java.awt.Color(255, 255, 255));
-    PanelLateral.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        emojisPanel.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        emojisPanel.setForeground(new java.awt.Color(204, 204, 204));
 
-    LabelUsers.setFont(new java.awt.Font("Lucida Sans", 1, 18)); // NOI18N
-    LabelUsers.setForeground(new java.awt.Color(255, 255, 255));
-    LabelUsers.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    LabelUsers.setText("En línea");
-    PanelLateral.add(LabelUsers, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 110, 100, -1));
+        love.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
 
-    labelImg.setPreferredSize(new java.awt.Dimension(250, 250));
-    PanelLateral.add(labelImg, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 20, 180, 60));
+        pensar.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
 
-    BtnLogout.setBackground(new java.awt.Color(204, 0, 0));
-    BtnLogout.setFont(new java.awt.Font("JetBrains Mono", 0, 14)); // NOI18N
-    BtnLogout.setForeground(new java.awt.Color(255, 255, 255));
-    BtnLogout.setText("Cerrar Sesión");
-    BtnLogout.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        BtnLogoutActionPerformed(evt);
-      }
-    });
-    PanelLateral.add(BtnLogout, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 710, 160, -1));
+        chris.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
 
-    scrollPaneFriends.setMaximumSize(new java.awt.Dimension(180, 250));
-    scrollPaneFriends.setPreferredSize(new java.awt.Dimension(180, 250));
+        no.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
 
-    paneFriends.setMaximumSize(new java.awt.Dimension(180, 250));
-    paneFriends.setPreferredSize(new java.awt.Dimension(180, 250));
+        pingu.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
 
-    javax.swing.GroupLayout paneFriendsLayout = new javax.swing.GroupLayout(paneFriends);
-    paneFriends.setLayout(paneFriendsLayout);
-    paneFriendsLayout.setHorizontalGroup(
-      paneFriendsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 184, Short.MAX_VALUE)
-    );
-    paneFriendsLayout.setVerticalGroup(
-      paneFriendsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 250, Short.MAX_VALUE)
-    );
+        reno.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
 
-    scrollPaneFriends.setViewportView(paneFriends);
+        risa.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
 
-    PanelLateral.add(scrollPaneFriends, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 150, 200, 250));
+        si.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
 
-    btnGroupChat.setBackground(AppColors.getSECONDARY_COLOR());
-    btnGroupChat.setFont(new java.awt.Font("JetBrains Mono", 0, 18)); // NOI18N
-    btnGroupChat.setForeground(new java.awt.Color(255, 255, 255));
-    btnGroupChat.setText("Chat Grupal");
-    btnGroupChat.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        btnGroupChatActionPerformed(evt);
-      }
-    });
-    PanelLateral.add(btnGroupChat, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 410, 180, 30));
-    PanelLateral.add(userInfoComponent, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 630, 200, 110));
+        tree.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
 
-    PanelChat.add(PanelLateral, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 200, 740));
+        javax.swing.GroupLayout emojisPanelLayout = new javax.swing.GroupLayout(emojisPanel);
+        emojisPanel.setLayout(emojisPanelLayout);
+        emojisPanelLayout.setHorizontalGroup(
+            emojisPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(emojisPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(emojisPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(risa, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
+                    .addComponent(love, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(reno, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(emojisPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(si, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
+                    .addComponent(pensar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(no, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(emojisPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(chris, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
+                    .addComponent(pingu, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(tree, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(8, Short.MAX_VALUE))
+        );
+        emojisPanelLayout.setVerticalGroup(
+            emojisPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(emojisPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(emojisPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(chris, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
+                    .addComponent(pensar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(love, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(emojisPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(reno, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
+                    .addComponent(no, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(pingu, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(emojisPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(risa, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
+                    .addComponent(si, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(tree, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(18, Short.MAX_VALUE))
+        );
 
-    ContainerMessage.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        PanelChat.add(emojisPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 448, 180, 190));
 
-    textFieldMessage.setBackground(new java.awt.Color(190, 190, 190));
-    textFieldMessage.setFont(new java.awt.Font("Lucida Sans", 0, 18)); // NOI18N
-    textFieldMessage.setForeground(new java.awt.Color(255, 255, 255));
-    textFieldMessage.setBorder(null);
-    textFieldMessage.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        textFieldMessageActionPerformed(evt);
-      }
-    });
-    ContainerMessage.add(textFieldMessage, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 10, 650, 40));
+        PanelLateral.setBackground(AppColors.getPRIMARY_COLOR());
+        PanelLateral.setBackground(new java.awt.Color(204, 0, 51));
+        PanelLateral.setForeground(new java.awt.Color(255, 255, 255));
+        PanelLateral.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-    fileBtn.setIcon(FontAwesomeIcons.fileIcon(25));
-    fileBtn.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        fileBtnActionPerformed(evt);
-      }
-    });
-    ContainerMessage.add(fileBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 10, 40, 40));
+        LabelUsers.setFont(new java.awt.Font("Lucida Sans", 1, 18)); // NOI18N
+        LabelUsers.setForeground(new java.awt.Color(255, 255, 255));
+        LabelUsers.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        LabelUsers.setText("En línea");
+        PanelLateral.add(LabelUsers, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 110, 100, -1));
 
-    emojiBtn.setIcon(FontAwesomeIcons.emojiIcon(25));
-    emojiBtn.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        emojiBtnActionPerformed(evt);
-      }
-    });
-    ContainerMessage.add(emojiBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 40, 40));
+        labelImg.setPreferredSize(new java.awt.Dimension(250, 250));
+        PanelLateral.add(labelImg, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 20, 180, 60));
 
-    sendBtn.setIcon(FontAwesomeIcons.sendIcon(25));
-    sendBtn.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        sendBtnActionPerformed(evt);
-      }
-    });
-    ContainerMessage.add(sendBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(790, 10, 40, 40));
+        BtnLogout.setBackground(new java.awt.Color(204, 0, 0));
+        BtnLogout.setFont(new java.awt.Font("JetBrains Mono", 0, 14)); // NOI18N
+        BtnLogout.setForeground(new java.awt.Color(255, 255, 255));
+        BtnLogout.setText("Cerrar Sesión");
+        BtnLogout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                BtnLogoutActionPerformed(evt);
+            }
+        });
+        PanelLateral.add(BtnLogout, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 710, 160, -1));
 
-    PanelChat.add(ContainerMessage, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 630, 840, 60));
+        scrollPaneFriends.setMaximumSize(new java.awt.Dimension(180, 250));
+        scrollPaneFriends.setPreferredSize(new java.awt.Dimension(180, 250));
 
-    welcomePanel.setBackground(AppColors.getBLUE_COLOR());
+        paneFriends.setMaximumSize(new java.awt.Dimension(180, 250));
+        paneFriends.setPreferredSize(new java.awt.Dimension(180, 250));
 
-    labelDestLabel.setFont(new java.awt.Font("Lucida Sans", 1, 18)); // NOI18N
-    labelDestLabel.setForeground(new java.awt.Color(255, 255, 255));
-    labelDestLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    labelDestLabel.setText("ChatGrupal");
+        javax.swing.GroupLayout paneFriendsLayout = new javax.swing.GroupLayout(paneFriends);
+        paneFriends.setLayout(paneFriendsLayout);
+        paneFriendsLayout.setHorizontalGroup(
+            paneFriendsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 184, Short.MAX_VALUE)
+        );
+        paneFriendsLayout.setVerticalGroup(
+            paneFriendsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 250, Short.MAX_VALUE)
+        );
 
-    javax.swing.GroupLayout welcomePanelLayout = new javax.swing.GroupLayout(welcomePanel);
-    welcomePanel.setLayout(welcomePanelLayout);
-    welcomePanelLayout.setHorizontalGroup(
-      welcomePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(welcomePanelLayout.createSequentialGroup()
-        .addGap(16, 16, 16)
-        .addComponent(labelDestLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addContainerGap(634, Short.MAX_VALUE))
-    );
-    welcomePanelLayout.setVerticalGroup(
-      welcomePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(welcomePanelLayout.createSequentialGroup()
-        .addContainerGap()
-        .addComponent(labelDestLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 38, Short.MAX_VALUE)
-        .addContainerGap())
-    );
+        scrollPaneFriends.setViewportView(paneFriends);
 
-    PanelChat.add(welcomePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 0, 850, 50));
+        PanelLateral.add(scrollPaneFriends, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 150, 200, 250));
 
-    pane.setLayout(new javax.swing.BoxLayout(pane, javax.swing.BoxLayout.X_AXIS));
-    ScrollPane.setViewportView(pane);
+        btnGroupChat.setBackground(AppColors.getSECONDARY_COLOR());
+        btnGroupChat.setFont(new java.awt.Font("JetBrains Mono", 0, 18)); // NOI18N
+        btnGroupChat.setForeground(new java.awt.Color(255, 255, 255));
+        btnGroupChat.setText("Chat Grupal");
+        btnGroupChat.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGroupChatActionPerformed(evt);
+            }
+        });
+        PanelLateral.add(btnGroupChat, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 410, 180, 30));
+        PanelLateral.add(userInfoComponent, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 630, 200, 110));
 
-    PanelChat.add(ScrollPane, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 60, 840, 560));
+        PanelChat.add(PanelLateral, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 200, 740));
 
-    javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-    getContentPane().setLayout(layout);
-    layout.setHorizontalGroup(
-      layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(layout.createSequentialGroup()
-        .addContainerGap()
-        .addComponent(PanelChat, javax.swing.GroupLayout.DEFAULT_SIZE, 1062, Short.MAX_VALUE))
-    );
-    layout.setVerticalGroup(
-      layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(layout.createSequentialGroup()
-        .addContainerGap()
-        .addComponent(PanelChat, javax.swing.GroupLayout.DEFAULT_SIZE, 743, Short.MAX_VALUE))
-    );
+        ContainerMessage.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-    pack();
-  }// </editor-fold>//GEN-END:initComponents
+        textFieldMessage.setBackground(new java.awt.Color(190, 190, 190));
+        textFieldMessage.setFont(new java.awt.Font("Lucida Sans", 0, 18)); // NOI18N
+        textFieldMessage.setForeground(new java.awt.Color(255, 255, 255));
+        textFieldMessage.setBorder(null);
+        textFieldMessage.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                textFieldMessageActionPerformed(evt);
+            }
+        });
+        ContainerMessage.add(textFieldMessage, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 10, 650, 40));
+
+        fileBtn.setIcon(FontAwesomeIcons.fileIcon(25));
+        fileBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                fileBtnActionPerformed(evt);
+            }
+        });
+        ContainerMessage.add(fileBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 10, 40, 40));
+
+        emojiBtn.setIcon(FontAwesomeIcons.emojiIcon(25));
+        emojiBtn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                emojiBtnMouseClicked(evt);
+            }
+        });
+        emojiBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                emojiBtnActionPerformed(evt);
+            }
+        });
+        ContainerMessage.add(emojiBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 40, 40));
+
+        sendBtn.setIcon(FontAwesomeIcons.sendIcon(25));
+        sendBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                sendBtnActionPerformed(evt);
+            }
+        });
+        ContainerMessage.add(sendBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(790, 10, 40, 40));
+
+        PanelChat.add(ContainerMessage, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 630, 840, 60));
+
+        welcomePanel.setBackground(AppColors.getBLUE_COLOR());
+
+        labelDestLabel.setFont(new java.awt.Font("Lucida Sans", 1, 18)); // NOI18N
+        labelDestLabel.setForeground(new java.awt.Color(255, 255, 255));
+        labelDestLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        labelDestLabel.setText("ChatGrupal");
+
+        javax.swing.GroupLayout welcomePanelLayout = new javax.swing.GroupLayout(welcomePanel);
+        welcomePanel.setLayout(welcomePanelLayout);
+        welcomePanelLayout.setHorizontalGroup(
+            welcomePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(welcomePanelLayout.createSequentialGroup()
+                .addGap(16, 16, 16)
+                .addComponent(labelDestLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(634, Short.MAX_VALUE))
+        );
+        welcomePanelLayout.setVerticalGroup(
+            welcomePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(welcomePanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(labelDestLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 38, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        PanelChat.add(welcomePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 0, 850, 50));
+
+        pane.setLayout(new javax.swing.BoxLayout(pane, javax.swing.BoxLayout.X_AXIS));
+        ScrollPane.setViewportView(pane);
+
+        PanelChat.add(ScrollPane, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 60, 840, 560));
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(PanelChat, javax.swing.GroupLayout.DEFAULT_SIZE, 1062, Short.MAX_VALUE))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(PanelChat, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
 
   private void textFieldMessageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textFieldMessageActionPerformed
     if(!textFieldMessage.equals("Escribe un mensaje...") && !textFieldMessage.equals("")) {
@@ -492,6 +699,10 @@ public class MulticastChat extends javax.swing.JFrame {
     
   }//GEN-LAST:event_sendBtnActionPerformed
 
+    private void emojiBtnMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_emojiBtnMouseClicked
+        emojisPanel.setVisible(!emojisPanel.isVisible());
+    }//GEN-LAST:event_emojiBtnMouseClicked
+
   /**
    * @param args the command line arguments
    */
@@ -527,24 +738,34 @@ public class MulticastChat extends javax.swing.JFrame {
     });
   }
 
-  // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JButton BtnLogout;
-  private javax.swing.JPanel ContainerMessage;
-  private javax.swing.JLabel LabelUsers;
-  private javax.swing.JPanel PanelChat;
-  private javax.swing.JPanel PanelLateral;
-  private javax.swing.JScrollPane ScrollPane;
-  private javax.swing.JButton btnGroupChat;
-  private javax.swing.JButton emojiBtn;
-  private javax.swing.JButton fileBtn;
-  private javax.swing.JLabel labelDestLabel;
-  private javax.swing.JLabel labelImg;
-  private javax.swing.JPanel pane;
-  private javax.swing.JPanel paneFriends;
-  private javax.swing.JScrollPane scrollPaneFriends;
-  private javax.swing.JButton sendBtn;
-  private javax.swing.JTextField textFieldMessage;
-  private components.UserInfoComponent userInfoComponent;
-  private javax.swing.JPanel welcomePanel;
-  // End of variables declaration//GEN-END:variables
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton BtnLogout;
+    private javax.swing.JPanel ContainerMessage;
+    private javax.swing.JLabel LabelUsers;
+    private javax.swing.JPanel PanelChat;
+    private javax.swing.JPanel PanelLateral;
+    private javax.swing.JScrollPane ScrollPane;
+    private javax.swing.JButton btnGroupChat;
+    private javax.swing.JLabel chris;
+    private javax.swing.JButton emojiBtn;
+    private javax.swing.JPanel emojisPanel;
+    private javax.swing.JButton fileBtn;
+    private javax.swing.JLabel labelDestLabel;
+    private javax.swing.JLabel labelImg;
+    private javax.swing.JLabel love;
+    private javax.swing.JLabel no;
+    private javax.swing.JPanel pane;
+    private javax.swing.JPanel paneFriends;
+    private javax.swing.JLabel pensar;
+    private javax.swing.JLabel pingu;
+    private javax.swing.JLabel reno;
+    private javax.swing.JLabel risa;
+    private javax.swing.JScrollPane scrollPaneFriends;
+    private javax.swing.JButton sendBtn;
+    private javax.swing.JLabel si;
+    private javax.swing.JTextField textFieldMessage;
+    private javax.swing.JLabel tree;
+    private components.UserInfoComponent userInfoComponent;
+    private javax.swing.JPanel welcomePanel;
+    // End of variables declaration//GEN-END:variables
 }
